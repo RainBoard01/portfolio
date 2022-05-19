@@ -1,5 +1,5 @@
 {
-  "name": "mantine-next-template",
+  "name": "portfolio",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -29,6 +29,7 @@
     "@next/bundle-analyzer": "^12.1.4",
     "cookies-next": "^2.0.4",
     "dayjs": "^1.11.0",
+    "framer-motion": "^6.3.3",
     "next": "12.1.4",
     "prism-react-renderer": "^1.3.1",
     "react": "18.1.0",
