@@ -2,7 +2,6 @@ import React, { FC } from 'react';
 import { motion } from 'framer-motion';
 
 interface Props {
-  children: any;
   delay: number;
 }
 

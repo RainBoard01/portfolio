@@ -1,15 +1,4 @@
-import {
-  Badge,
-  Button,
-  Card,
-  Container,
-  Group,
-  Image,
-  SimpleGrid,
-  Text,
-  Title,
-  useMantineTheme,
-} from '@mantine/core';
+import { Badge, Card, Group, Image, SimpleGrid, Text, Title, useMantineTheme } from '@mantine/core';
 import React from 'react';
 import { Section } from '../components/Section/section';
 
@@ -17,7 +6,7 @@ const Works = () => {
   const theme = useMantineTheme();
   const secondaryColor = theme.colorScheme === 'dark' ? theme.colors.dark[1] : theme.colors.gray[7];
   return (
-    <Section>
+    <Section delay={0}>
       <Title
         order={3}
         sx={{

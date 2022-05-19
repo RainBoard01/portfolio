@@ -62,7 +62,7 @@ export default function HomePage(): JSX.Element {
           Music, Games, Playing Piano, Photography, Trekking, Swimming and Table Tennis.
         </Text>
       </Section>
-      <Section delay={0.2}>
+      <Section delay={0.3}>
         <Title
           order={3}
           sx={{
