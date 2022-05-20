@@ -3,10 +3,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronRightIcon } from '@modulz/radix-icons';
 import { Section } from '../components/Section/section';
+import { Article } from '../components/Layout/article';
 
 export default function HomePage(): JSX.Element {
   return (
-    <>
+    <Article title="Homepage">
       <Card mb={6} radius="lg">
         <Text align="center">Hello, I'm an web developer based in Chile!</Text>
       </Card>
@@ -40,7 +41,7 @@ export default function HomePage(): JSX.Element {
           finishing his Software Engineer studies.
         </Text>
         <Container mt={15} size={118} px={0}>
-          <Link href="/works">
+          <Link href="/works" passHref>
             <Button rightIcon={<ChevronRightIcon />}>My portfolio</Button>
           </Link>
         </Container>
@@ -79,6 +80,6 @@ export default function HomePage(): JSX.Element {
           asd
         </Text>
       </Section>
-    </>
+    </Article>
   );
 }

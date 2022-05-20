@@ -3,13 +3,19 @@ import { useState } from 'react';
 import { AppProps } from 'next/app';
 import { getCookie, setCookies } from 'cookies-next';
 import Head from 'next/head';
-import { MantineProvider, ColorScheme, ColorSchemeProvider, AppShell } from '@mantine/core';
+import {
+  MantineProvider,
+  ColorScheme,
+  ColorSchemeProvider,
+  AppShell,
+  Container,
+} from '@mantine/core';
 import { NotificationsProvider } from '@mantine/notifications';
+import { AnimatePresence } from 'framer-motion';
 import { Navbar } from '../components/Navbar/navbar';
-import { Layout } from '../components/Layout/layout';
 
 export default function App(props: AppProps & { colorScheme: ColorScheme }) {
-  const { Component, pageProps } = props;
+  const { Component, pageProps, router } = props;
   const [colorScheme, setColorScheme] = useState<ColorScheme>(props.colorScheme);
 
   const toggleColorScheme = (value?: ColorScheme) => {
@@ -23,7 +29,20 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
       <Head>
         <title>Yerko Acuña - Homepage</title>
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
-        <link rel="shortcut icon" href="/favicon.svg" />
+        <meta name="description" content="Yerko's homepage" />
+        <meta name="author" content="Yerko Acuña" />
+        <meta name="author" content="rainboard" />
+        <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <meta name="twitter:title" content="Yerko Acuña" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@rainboard" />
+        <meta name="twitter:creator" content="@rainboard" />
+        <meta name="twitter:image" content="https://about.yerkoacuna.tk/card.png" />
+        <meta property="og:site_name" content="Yerko Acuña" />
+        <meta name="og:title" content="Yerko Acuña" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://about.yerkoacuna.tk/card.png" />
       </Head>
 
       <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
@@ -38,9 +57,13 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
                 },
               })}
             >
-              <Layout>
-                <Component {...pageProps} />
-              </Layout>
+              <Container size="xs">
+                voxel
+                <AnimatePresence exitBeforeEnter onExitComplete={() => window.scrollTo(0, 0)}>
+                  <Component {...pageProps} key={router.pathname} />
+                </AnimatePresence>
+                footer
+              </Container>
             </AppShell>
           </NotificationsProvider>
         </MantineProvider>
