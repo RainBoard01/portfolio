@@ -1,4 +1,5 @@
 FROM node:16 as dependencies
+RUN npm install -g npm@8.12.1
 WORKDIR /portfolio
 COPY package.json ./
 RUN npm install
