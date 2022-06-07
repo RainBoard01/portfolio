@@ -1,12 +1,12 @@
 /* eslint-disable no-param-reassign */
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 export const loadGLTFModel = (
   scene: THREE.Scene,
   glbPath: string,
   options = { receiveShadow: true, castShadow: true }
-) => {
+): Promise<GLTF> => {
   const { receiveShadow, castShadow } = options;
 
   return new Promise((resolve, reject) => {
