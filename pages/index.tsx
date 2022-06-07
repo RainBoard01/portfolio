@@ -1,8 +1,18 @@
 /* eslint-disable react/no-unescaped-entities */
-import { Box, Button, Container, Group, MediaQuery, Text, Title } from '@mantine/core';
+import {
+  Anchor,
+  Box,
+  Button,
+  Container,
+  Group,
+  List,
+  MediaQuery,
+  Text,
+  Title,
+} from '@mantine/core';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronRightIcon } from '@modulz/radix-icons';
+import { ChevronRight, BrandGithub, BrandInstagram, Mail } from 'tabler-icons-react';
 import { Section } from '../components/Section/section';
 import { Article } from '../components/Layout/article';
 
@@ -54,7 +64,7 @@ export default function HomePage(): JSX.Element {
         </Text>
         <Container mt={15} size={118} px={0}>
           <Link href="/works" passHref>
-            <Button rightIcon={<ChevronRightIcon />}>My portfolio</Button>
+            <Button rightIcon={<ChevronRight size={15} />}>My portfolio</Button>
           </Link>
         </Container>
       </Section>
@@ -88,9 +98,29 @@ export default function HomePage(): JSX.Element {
         >
           On the web
         </Title>
-        <Text align="justify" sx={{ textIndent: '20px' }}>
-          asd
-        </Text>
+        <List listStyleType="none">
+          <List.Item>
+            <Anchor href="https://github.com/rainboard01" target="_blank">
+              <Button size="md" variant="subtle" leftIcon={<BrandGithub size={18} />}>
+                @rainboard01
+              </Button>
+            </Anchor>
+          </List.Item>
+          <List.Item>
+            <Anchor href="https://instagram.com/yerkoacuna.h" target="_blank">
+              <Button size="md" variant="subtle" leftIcon={<BrandInstagram size={18} />}>
+                @yerkoacuna.h
+              </Button>
+            </Anchor>
+          </List.Item>
+          <List.Item>
+            <Anchor href="mailto:amdmsi4ever@hotmail.com" target="_blank">
+              <Button size="md" variant="subtle" leftIcon={<Mail size={18} />}>
+                amdmsi4ever@hotmail.com
+              </Button>
+            </Anchor>
+          </List.Item>
+        </List>
       </Section>
     </Article>
   );
