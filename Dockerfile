@@ -1,14 +1,13 @@
 FROM node:16 as dependencies
-RUN npm install -g npm@8.12.1
 WORKDIR /portfolio
 COPY package.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 FROM node:16 as builder
 WORKDIR /portfolio
 COPY . .
 COPY --from=dependencies /portfolio/node_modules ./node_modules
-RUN npm build
+RUN npm run build
 
 FROM node:16 as runner
 WORKDIR /portfolio
