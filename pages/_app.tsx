@@ -15,6 +15,7 @@ import { NotificationsProvider } from '@mantine/notifications';
 import { AnimatePresence } from 'framer-motion';
 import { Navbar } from '../components/Navbar/navbar';
 import { ThreeContainer } from '../components/ThreeContainer/threeContainer';
+import Fonts from '../components/fonts';
 
 export default function App(props: AppProps & { colorScheme: ColorScheme }) {
   const { Component, pageProps, router } = props;
@@ -68,6 +69,7 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
                 },
               })}
             >
+              <Fonts />
               <Container size="xs" pt="60px" pb="16px">
                 <ThreeContainer />
                 <AnimatePresence exitBeforeEnter onExitComplete={() => window.scrollTo(0, 0)}>
