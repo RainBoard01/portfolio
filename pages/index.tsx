@@ -1,4 +1,5 @@
-import { Button, Card, Container, Group, MediaQuery, Text, Title } from '@mantine/core';
+/* eslint-disable react/no-unescaped-entities */
+import { Box, Button, Container, Group, MediaQuery, Text, Title } from '@mantine/core';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronRightIcon } from '@modulz/radix-icons';
@@ -8,12 +9,23 @@ import { Article } from '../components/Layout/article';
 export default function HomePage(): JSX.Element {
   return (
     <Article title="Homepage">
-      <Card mb={6} radius="lg">
+      <Box
+        mb={20}
+        p={12}
+        sx={(theme) => ({
+          backgroundColor:
+            theme.colorScheme === 'dark'
+              ? theme.fn.rgba('#ffffff', 0.08)
+              : theme.fn.rgba('#ffffff', 0.36),
+          borderRadius: theme.radius.md,
+          backdropFilter: 'blur(10px)',
+        })}
+      >
         <Text align="center">Hello, I'm an web developer based in Chile!</Text>
-      </Card>
-      <MediaQuery smallerThan="sm" styles={{ flexDirection: 'column' }}>
+      </Box>
+      <MediaQuery smallerThan="sm" styles={{ flexDirection: 'column', alignItems: 'center' }}>
         <Group position="apart" align="start">
-          <div>
+          <div style={{ alignSelf: 'stretch' }}>
             <Title order={1}>Yerko Acuña</Title>
             <Text>Digital Craftzman ( Musician / Developer / Designer )</Text>
           </div>

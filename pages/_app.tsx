@@ -9,10 +9,12 @@ import {
   ColorSchemeProvider,
   AppShell,
   Container,
+  Center,
 } from '@mantine/core';
 import { NotificationsProvider } from '@mantine/notifications';
 import { AnimatePresence } from 'framer-motion';
 import { Navbar } from '../components/Navbar/navbar';
+import { ThreeContainer } from '../components/ThreeContainer/threeContainer';
 
 export default function App(props: AppProps & { colorScheme: ColorScheme }) {
   const { Component, pageProps, router } = props;
@@ -46,23 +48,40 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
       </Head>
 
       <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
-        <MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>
+        <MantineProvider
+          theme={{
+            colorScheme,
+            headings: {
+              fontFamily: "'M PLUS Rounded 1c'",
+            },
+          }}
+          withGlobalStyles
+          withNormalizeCSS
+        >
           <NotificationsProvider>
             <AppShell
               header={<Navbar />}
               styles={(theme) => ({
                 main: {
                   backgroundColor:
-                    theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+                    theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.colors.cyan[0],
                 },
               })}
             >
-              <Container size="xs">
-                voxel
+              <Container size="xs" pt="60px" pb="16px">
+                <ThreeContainer />
                 <AnimatePresence exitBeforeEnter onExitComplete={() => window.scrollTo(0, 0)}>
                   <Component {...pageProps} key={router.pathname} />
                 </AnimatePresence>
-                footer
+                <Center
+                  sx={(theme) => ({
+                    opacity: 0.4,
+                    fontSize: theme.fontSizes.sm,
+                    textAlign: 'center',
+                  })}
+                >
+                  &copy; {new Date().getFullYear()} Yerko Acuña. All Rights Reserved.
+                </Center>
               </Container>
             </AppShell>
           </NotificationsProvider>
