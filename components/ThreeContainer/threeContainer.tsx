@@ -95,7 +95,7 @@ export const ThreeContainer = (): JSX.Element => {
       };
 
       //Load model
-      loadGLTFModel(scene, 'http://localhost:3000/scene.gltf', {
+      loadGLTFModel(scene, '/scene.gltf', {
         receiveShadow: false,
         castShadow: true,
       }).then((res) => {
