@@ -64,8 +64,7 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
               header={<Navbar />}
               styles={(theme) => ({
                 main: {
-                  backgroundColor:
-                    theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.colors.cyan[0],
+                  backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : '#E2E6C8',
                 },
               })}
             >
