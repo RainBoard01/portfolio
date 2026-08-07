@@ -1,0 +1,265 @@
+---
+import type { ExperienceItem, Locale } from '@/domain';
+
+export interface RelatedCaseLink {
+  href: string;
+  label: string;
+}
+
+interface Props {
+  items: ExperienceItem[];
+  language?: Locale;
+  relatedCases?: Record<string, RelatedCaseLink>;
+  compact?: boolean;
+}
+
+const {
+  items,
+  language = 'en',
+  relatedCases = {},
+  compact = false,
+} = Astro.props;
+
+const copy = language === 'es'
+  ? {
+      label: 'Trayectoria profesional',
+      employment: 'Equipo de producto',
+      company: 'Yerko Acuña EIRL',
+      highlights: 'Contribuciones seleccionadas',
+      work: 'Trabajo relacionado',
+      technologies: 'Tecnologías',
+    }
+  : {
+      label: 'Professional experience',
+      employment: 'Product team',
+      company: 'Yerko Acuña EIRL',
+      highlights: 'Selected contributions',
+      work: 'Related work',
+      technologies: 'Technologies',
+    };
+---
+
+<ol class:list={['timeline', { 'timeline--compact': compact }]} aria-label={copy.label}>
+  {items.map((item) => {
+    const linkedCases = item.caseStudyIds
+      .map((id) => relatedCases[id])
+      .filter((link): link is RelatedCaseLink => Boolean(link));
+
+    return (
+      <li class="timeline-item">
+        <div class="timeline-marker" aria-hidden="true"></div>
+        <div class="timeline-period">
+          <span>{item.periodLabel}</span>
+          <small>{item.engagement === 'company' ? copy.company : copy.employment}</small>
+        </div>
+
+        <article>
+          <header>
+            <h3>{item.role}</h3>
+            <p>{item.organization}</p>
+          </header>
+          <p class="timeline-summary">{item.summary}</p>
+
+          {!compact && item.highlights.length > 0 && (
+            <div class="timeline-highlights">
+              <h4>{copy.highlights}</h4>
+              <ul>
+                {item.highlights.map((highlight) => <li>{highlight}</li>)}
+              </ul>
+            </div>
+          )}
+
+          <footer>
+            <ul class="tag-list" aria-label={copy.technologies}>
+              {item.technologies.map((technology) => <li>{technology}</li>)}
+            </ul>
+            {linkedCases.length > 0 && (
+              <div class="related-cases">
+                <span>{copy.work}</span>
+                {linkedCases.map((link) => <a href={link.href}>{link.label}</a>)}
+              </div>
+            )}
+          </footer>
+        </article>
+      </li>
+    );
+  })}
+</ol>
+
+<style>
+  .timeline,
+  .timeline ul {
+    padding: 0;
+    list-style: none;
+  }
+
+  .timeline {
+    border-top: 1px solid var(--color-line-strong);
+  }
+
+  .timeline-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(9rem, 0.42fr) minmax(0, 1.58fr);
+    gap: clamp(2rem, 8vw, 8rem);
+    padding-block: var(--space-7);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .timeline-marker {
+    position: absolute;
+    top: calc(var(--space-7) + 0.35rem);
+    left: -0.15rem;
+    width: 0.42rem;
+    height: 0.42rem;
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+
+  .timeline-period {
+    padding-inline-start: var(--space-4);
+  }
+
+  .timeline-period span,
+  .timeline-period small {
+    display: block;
+  }
+
+  .timeline-period span {
+    color: var(--color-ink);
+    font-size: var(--step--1);
+    font-weight: 760;
+  }
+
+  .timeline-period small {
+    margin-top: var(--space-2);
+    color: var(--color-accent-strong);
+    font-size: 0.66rem;
+    font-weight: 720;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  article {
+    max-width: 58rem;
+  }
+
+  article > header {
+    display: flex;
+    gap: var(--space-3) var(--space-5);
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  h3 {
+    font-size: var(--step-2);
+    font-weight: 630;
+    letter-spacing: -0.035em;
+  }
+
+  article > header p {
+    flex: 0 0 auto;
+    color: var(--color-ink-soft);
+    font-size: var(--step--1);
+    font-weight: 680;
+  }
+
+  .timeline-summary {
+    max-width: var(--measure);
+    margin-top: var(--space-4);
+    color: var(--color-ink-soft);
+  }
+
+  .timeline-highlights {
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-line);
+  }
+
+  h4,
+  .related-cases > span {
+    color: var(--color-ink-faint);
+    font-size: 0.66rem;
+    font-weight: 780;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .timeline-highlights ul {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: var(--space-3);
+  }
+
+  .timeline-highlights li {
+    position: relative;
+    padding-inline-start: 1.15rem;
+    color: var(--color-ink-soft);
+    font-size: var(--step--1);
+  }
+
+  .timeline-highlights li::before {
+    position: absolute;
+    top: 0.72em;
+    left: 0;
+    width: 0.3rem;
+    height: 0.3rem;
+    border-radius: 50%;
+    background: var(--color-accent);
+    content: '';
+  }
+
+  footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-top: var(--space-5);
+  }
+
+  .tag-list {
+    max-width: 42rem;
+  }
+
+  .related-cases {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .related-cases a {
+    color: var(--color-accent-strong);
+    font-size: var(--step--1);
+    font-weight: 720;
+  }
+
+  .timeline--compact .timeline-item {
+    padding-block: var(--space-6);
+  }
+
+  .timeline--compact .timeline-marker {
+    top: calc(var(--space-6) + 0.35rem);
+  }
+
+  @media (max-width: 48rem) {
+    .timeline-item {
+      grid-template-columns: 1fr;
+      gap: var(--space-4);
+      padding-inline-start: var(--space-5);
+    }
+
+    .timeline-marker {
+      left: 0;
+    }
+
+    .timeline-period {
+      padding-inline-start: 0;
+    }
+
+    article > header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+</style>

@@ -1,0 +1,19 @@
+---
+import BlogPostPage from '@/views/BlogPostPage.astro';
+import { BLOG_POST_SLUGS, type BlogPostId } from '@/i18n';
+
+export function getStaticPaths() {
+  return Object.entries(BLOG_POST_SLUGS).map(([postId, slugs]) => ({
+    params: { slug: slugs.es },
+    props: { postId: postId as BlogPostId },
+  }));
+}
+
+interface Props {
+  postId: BlogPostId;
+}
+
+const { postId } = Astro.props;
+---
+
+<BlogPostPage language="es" postId={postId} />

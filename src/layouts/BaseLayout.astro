@@ -1,0 +1,170 @@
+---
+import '@fontsource-variable/manrope/wght.css';
+import '@fontsource-variable/newsreader/wght.css';
+import '../styles/global.css';
+
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { alternatePathFor, type SiteLanguage } from '../components/navigation';
+
+type JsonLdDocument = Record<string, unknown>;
+
+interface Props {
+  title: string;
+  description: string;
+  language?: SiteLanguage;
+  canonical?: string | URL;
+  alternateHref?: string | URL;
+  ogImage?: string | URL;
+  ogType?: 'website' | 'article' | 'profile';
+  publishedTime?: string;
+  modifiedTime?: string;
+  noindex?: boolean;
+  jsonLd?: JsonLdDocument | JsonLdDocument[];
+  bodyClass?: string;
+}
+
+const {
+  title,
+  description,
+  language = 'en',
+  canonical,
+  alternateHref,
+  ogImage = '/og.png',
+  ogType = 'website',
+  publishedTime,
+  modifiedTime,
+  noindex = false,
+  jsonLd,
+  bodyClass,
+} = Astro.props;
+
+const siteName = 'Yerko Acuña';
+const configuredSite = import.meta.env.PUBLIC_SITE_URL || 'https://yerkoacuna.dev';
+const siteUrl = Astro.site ?? new URL(configuredSite);
+const canonicalUrl = canonical
+  ? new URL(canonical.toString(), siteUrl)
+  : new URL(Astro.url.pathname, siteUrl);
+const alternateLanguage: SiteLanguage = language === 'en' ? 'es' : 'en';
+const alternateUrl = new URL(
+  alternateHref?.toString() ?? alternatePathFor(Astro.url.pathname, language),
+  siteUrl,
+);
+const englishUrl = language === 'en' ? canonicalUrl : alternateUrl;
+const absoluteOgImage = ogImage ? new URL(ogImage.toString(), siteUrl) : undefined;
+const pageTitle = title.toLocaleLowerCase().includes(siteName.toLocaleLowerCase())
+  ? title
+  : `${title} — ${siteName}`;
+const locale = language === 'es' ? 'es_CL' : 'en_US';
+const alternateLocale = language === 'es' ? 'en_US' : 'es_CL';
+const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'contact@yerkoacuna.dev';
+const sameAs = [
+  import.meta.env.PUBLIC_GITHUB_URL || 'https://github.com/RainBoard01',
+  import.meta.env.PUBLIC_LINKEDIN_URL,
+].filter((value): value is string => Boolean(value));
+
+const defaultJsonLd: JsonLdDocument = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl.origin}/#website`,
+      url: `${siteUrl.origin}/`,
+      name: siteName,
+      description,
+      inLanguage: ['en', 'es'],
+      publisher: { '@id': `${siteUrl.origin}/#person` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${siteUrl.origin}/#person`,
+      name: siteName,
+      url: `${siteUrl.origin}/`,
+      jobTitle: 'Senior Full-Stack Engineer and Technical Lead',
+      email: `mailto:${contactEmail}`,
+      sameAs,
+      worksFor: { '@id': `${siteUrl.origin}/#business` },
+    },
+    {
+      '@type': 'Organization',
+      '@id': `${siteUrl.origin}/#business`,
+      name: 'Desarrollo de Software Yerko Acuña EIRL',
+      url: `${siteUrl.origin}/services`,
+      email: `mailto:${contactEmail}`,
+      founder: { '@id': `${siteUrl.origin}/#person` },
+    },
+  ],
+};
+
+const jsonLdDocuments = [defaultJsonLd, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [])];
+const serializeJsonLd = (value: JsonLdDocument) => JSON.stringify(value).replace(/</g, '\\u003c');
+---
+
+<!doctype html>
+<html lang={language}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#f4f0e7" media="(prefers-color-scheme: light)" />
+    <meta name="color-scheme" content="light" />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={siteName} />
+    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
+    <meta name="build-revision" content={__BUILD_SHA__} />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={language === 'es' ? 'Notas de Yerko Acuña' : 'Yerko Acuña field notes'}
+      href={language === 'es' ? '/es/rss.xml' : '/rss.xml'}
+    />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" hreflang={language} href={canonicalUrl} />
+    <link rel="alternate" hreflang={alternateLanguage} href={alternateUrl} />
+    <link rel="alternate" hreflang="x-default" href={englishUrl} />
+
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:locale" content={locale} />
+    <meta property="og:locale:alternate" content={alternateLocale} />
+    {absoluteOgImage && <meta property="og:image" content={absoluteOgImage} />}
+    {absoluteOgImage && <meta property="og:image:alt" content="Yerko Acuña — Software systems, built end to end." />}
+
+    <meta name="twitter:card" content={absoluteOgImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    {absoluteOgImage && <meta name="twitter:image" content={absoluteOgImage} />}
+
+    {ogType === 'article' && publishedTime && (
+      <meta property="article:published_time" content={publishedTime} />
+    )}
+    {ogType === 'article' && modifiedTime && (
+      <meta property="article:modified_time" content={modifiedTime} />
+    )}
+
+    {jsonLdDocuments.map((document) => (
+      <script is:inline type="application/ld+json" set:html={serializeJsonLd(document)} />
+    ))}
+    <slot name="head" />
+  </head>
+  <body class:list={[bodyClass]} data-language={language}>
+    <a class="skip-link" href="#main-content">
+      {language === 'es' ? 'Saltar al contenido principal' : 'Skip to main content'}
+    </a>
+    <Header
+      language={language}
+      currentPath={Astro.url.pathname}
+      alternateHref={`${alternateUrl.pathname}${alternateUrl.search}${alternateUrl.hash}`}
+    />
+    <main id="main-content" tabindex="-1">
+      <slot />
+    </main>
+    <Footer language={language} />
+  </body>
+</html>

@@ -1,0 +1,548 @@
+---
+import type { Locale } from '@/domain';
+import { getContent } from '@/data';
+import {
+  blogPostPath,
+  caseStudyPath,
+  routePath,
+  type BlogPostId,
+  type CaseStudyId,
+} from '@/i18n/routes';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CaseCard from '@/components/CaseCard.astro';
+import CTA from '@/components/CTA.astro';
+import DualTrack from '@/components/DualTrack.astro';
+import ExperienceTimeline from '@/components/ExperienceTimeline.astro';
+import MetricStrip from '@/components/MetricStrip.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+
+interface Props {
+  language: Locale;
+}
+
+const { language } = Astro.props;
+const content = await getContent(language);
+const { settings, labels, pages, profile, company, experiences, caseStudies, blogPosts } = content;
+const featuredCases = caseStudies
+  .filter((item) => item.featured)
+  .sort((a, b) => a.sortOrder - b.sortOrder)
+  .slice(0, 3);
+const featuredPost = blogPosts.find((post) => post.featured) ?? blogPosts[0];
+const caseHref = (id: string) => caseStudyPath(id as CaseStudyId, language);
+const postHref = featuredPost
+  ? blogPostPath(featuredPost.id as BlogPostId, language)
+  : routePath('blog', language);
+const formattedPostDate = featuredPost
+  ? new Intl.DateTimeFormat(language === 'es' ? 'es-CL' : 'en-US', {
+      dateStyle: 'medium',
+      timeZone: 'UTC',
+    }).format(new Date(`${featuredPost.publishedAt}T00:00:00Z`))
+  : '';
+
+const copy = language === 'es'
+  ? {
+      heroContext: 'Chile · Colaboración remota',
+      heroWork: 'Ver trabajo seleccionado',
+      heroContact: 'Conversar sobre una necesidad',
+      deliveryLabel: 'De problema a producción',
+      deliverySteps: ['Entender la operación', 'Diseñar los límites', 'Construir el sistema', 'Operar y aprender'],
+      modesEyebrow: 'Dos modalidades',
+      modesTitle: 'Una misma práctica técnica, dos formas de colaborar.',
+      modesDescription:
+        'El contexto, la arquitectura y la entrega permanecen conectados; lo que cambia es el modelo de colaboración.',
+      embeddedLabel: 'Ingeniería y liderazgo',
+      embeddedTitle: profile.role,
+      embeddedDescription:
+        'Me integro a equipos que necesitan ownership full-stack, criterio de arquitectura y una línea técnica clara desde requerimientos hasta producción.',
+      embeddedLink: 'Conocer mi experiencia',
+      companyLabel: 'Consultoría de software',
+      companyTitle: company.shortName,
+      companyDescription: company.headline,
+      companyLink: 'Explorar servicios',
+      metricSince: 'Entrega empresarial',
+      metricSinceDetail: 'Experiencia profesional documentada desde 2022.',
+      metricCases: 'Casos documentados',
+      metricCasesDetail: 'Sistemas operacionales, investigación y modernización.',
+      metricDomains: 'Dominios operacionales',
+      metricDomainsDetail: 'Experiencia que exige aprender el contexto antes de diseñar.',
+      metricModes: 'Formas de colaborar',
+      metricModesDetail: 'Integrado a un equipo o mediante la EIRL.',
+      workEyebrow: 'Evidencia',
+      workTitle: 'Sistemas construidos alrededor del trabajo real.',
+      workDescription:
+        'Cada caso explica el contexto, la responsabilidad, las decisiones y el resultado sin exponer información confidencial.',
+      capabilitiesEyebrow: 'Capacidades',
+      capabilitiesTitle: 'Profundidad full-stack con una sola línea de responsabilidad.',
+      capabilitiesDescription:
+        'La tecnología importa en función del flujo operacional, la mantenibilidad y la entrega.',
+      experienceEyebrow: 'Trayectoria',
+      experienceTitle: 'Experiencia reciente en dos frentes complementarios.',
+      experienceDescription:
+        'Trabajo empresarial dentro de un equipo y entrega independiente mediante una empresa de software.',
+      notesEyebrow: 'Notas de campo',
+      notesTitle: 'Escribir para hacer explícito el criterio técnico.',
+      notesDescription:
+        'El blog comienza con una nota real sobre ownership end-to-end, arquitectura y entrega.',
+      published: 'Publicado',
+      readNote: 'Leer la nota',
+      ctaEyebrow: 'Próximo paso',
+      ctaTitle: 'Cuéntame qué operación, producto o sistema necesita avanzar.',
+      ctaDescription:
+        'Puedo integrarme a un equipo como ingeniero senior o liderar un proyecto definido mediante Desarrollo de Software Yerko Acuña EIRL.',
+    }
+  : {
+      heroContext: 'Chile · Remote collaboration',
+      heroWork: 'View selected work',
+      heroContact: 'Discuss a need',
+      deliveryLabel: 'From problem to production',
+      deliverySteps: ['Understand the operation', 'Design the boundaries', 'Build the system', 'Operate and learn'],
+      modesEyebrow: 'Two engagement paths',
+      modesTitle: 'One technical practice, two ways to work together.',
+      modesDescription:
+        'Context, architecture, and delivery stay connected; only the collaboration model changes.',
+      embeddedLabel: 'Engineering and leadership',
+      embeddedTitle: profile.role,
+      embeddedDescription:
+        'I join teams that need full-stack ownership, architectural judgment, and a clear technical line from requirements through production.',
+      embeddedLink: 'Explore my experience',
+      companyLabel: 'Software consultancy',
+      companyTitle: company.shortName,
+      companyDescription: company.headline,
+      companyLink: 'Explore services',
+      metricSince: 'Enterprise delivery',
+      metricSinceDetail: 'Documented professional experience since 2022.',
+      metricCases: 'Documented cases',
+      metricCasesDetail: 'Operational systems, research, and modernization.',
+      metricDomains: 'Operational domains',
+      metricDomainsDetail: 'Experience that starts by learning the context.',
+      metricModes: 'Ways to collaborate',
+      metricModesDetail: 'Embedded with a team or engaged through the company.',
+      workEyebrow: 'Evidence',
+      workTitle: 'Systems built around the work people actually do.',
+      workDescription:
+        'Each case explains context, responsibility, decisions, and outcomes without disclosing confidential information.',
+      capabilitiesEyebrow: 'Capabilities',
+      capabilitiesTitle: 'Full-stack depth with one line of responsibility.',
+      capabilitiesDescription:
+        'Technology choices serve the operational workflow, maintainability, and delivery path.',
+      experienceEyebrow: 'Experience',
+      experienceTitle: 'Recent work across two complementary tracks.',
+      experienceDescription:
+        'Enterprise delivery inside a product team and independent work through a software company.',
+      notesEyebrow: 'Field notes',
+      notesTitle: 'Writing makes technical judgment explicit.',
+      notesDescription:
+        'The blog starts with a real note about end-to-end ownership, architecture, and delivery.',
+      published: 'Published',
+      readNote: 'Read the note',
+      ctaEyebrow: 'Next step',
+      ctaTitle: 'Tell me what operation, product, or system needs to move forward.',
+      ctaDescription:
+        'I can join a team as a senior engineer or lead a defined engagement through Desarrollo de Software Yerko Acuña EIRL.',
+    };
+
+const tracks = [
+  {
+    eyebrow: copy.embeddedLabel,
+    title: copy.embeddedTitle,
+    description: copy.embeddedDescription,
+    details: profile.focusAreas.slice(0, 3),
+    href: routePath('experience', language),
+    linkLabel: copy.embeddedLink,
+  },
+  {
+    eyebrow: copy.companyLabel,
+    title: copy.companyTitle,
+    description: copy.companyDescription,
+    details: company.bestFor.slice(0, 3),
+    href: routePath('services', language),
+    linkLabel: copy.companyLink,
+  },
+];
+
+const metrics = [
+  { value: '2022—', label: copy.metricSince, detail: copy.metricSinceDetail },
+  { value: caseStudies.length, label: copy.metricCases, detail: copy.metricCasesDetail },
+  { value: profile.domains.length, label: copy.metricDomains, detail: copy.metricDomainsDetail },
+  { value: 2, label: copy.metricModes, detail: copy.metricModesDetail },
+];
+---
+
+<BaseLayout
+  title={settings.defaultTitle}
+  description={settings.defaultDescription}
+  language={language}
+  ogImage="/og.png"
+>
+  <section class="hero shell" aria-labelledby="home-title">
+    <div class="hero-copy">
+      <p class="eyebrow">{pages.home.eyebrow}</p>
+      <h1 id="home-title">{pages.home.title}</h1>
+      <p class="hero-description">{pages.home.description}</p>
+      <div class="button-row">
+        <a class="button" href={routePath('work', language)}>{copy.heroWork}</a>
+        <a class="button button--secondary" href={routePath('contact', language)}>
+          {copy.heroContact}
+        </a>
+      </div>
+      <p class="hero-context">{copy.heroContext}</p>
+    </div>
+
+    <aside class="delivery-map" aria-label={copy.deliveryLabel}>
+      <p>{copy.deliveryLabel}</p>
+      <ol>
+        {copy.deliverySteps.map((step, index) => (
+          <li>
+            <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            <strong>{step}</strong>
+          </li>
+        ))}
+      </ol>
+    </aside>
+  </section>
+
+  <section class="section section--ruled">
+    <div class="shell section-stack">
+      <SectionHeading
+        eyebrow={copy.modesEyebrow}
+        title={copy.modesTitle}
+        description={copy.modesDescription}
+      />
+      <DualTrack tracks={tracks} ariaLabel={copy.modesTitle} />
+    </div>
+  </section>
+
+  <div class="shell">
+    <MetricStrip items={metrics} />
+  </div>
+
+  <section class="section">
+    <div class="shell section-stack">
+      <SectionHeading
+        eyebrow={copy.workEyebrow}
+        title={copy.workTitle}
+        description={copy.workDescription}
+      >
+        <a slot="actions" class="text-link" href={routePath('work', language)}>{labels.viewAllWork}</a>
+      </SectionHeading>
+      <div class="case-grid">
+        {featuredCases.map((caseStudy, index) => (
+          <CaseCard
+            caseStudy={caseStudy}
+            href={caseHref(caseStudy.id)}
+            language={language}
+            readLabel={labels.readCaseStudy}
+            index={index}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface section--ruled">
+    <div class="shell section-stack">
+      <SectionHeading
+        eyebrow={copy.capabilitiesEyebrow}
+        title={copy.capabilitiesTitle}
+        description={copy.capabilitiesDescription}
+      />
+      <div class="capability-grid">
+        {profile.expertise.map((group, index) => (
+          <article>
+            <p aria-hidden="true">{String(index + 1).padStart(2, '0')}</p>
+            <h3>{group.title}</h3>
+            <ul>
+              {group.items.slice(0, 5).map((item) => <li>{item}</li>)}
+            </ul>
+          </article>
+        ))}
+      </div>
+      <a class="text-link" href={routePath('about', language)}>
+        {language === 'es' ? 'Ver perfil y expertise completo' : 'View full profile and expertise'}
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="shell section-stack">
+      <SectionHeading
+        eyebrow={copy.experienceEyebrow}
+        title={copy.experienceTitle}
+        description={copy.experienceDescription}
+      >
+        <a slot="actions" class="text-link" href={routePath('experience', language)}>
+          {language === 'es' ? 'Ver experiencia completa' : 'View full experience'}
+        </a>
+      </SectionHeading>
+      <ExperienceTimeline items={experiences} language={language} compact />
+    </div>
+  </section>
+
+  {featuredPost && (
+    <section class="section notes-section section--ruled">
+      <div class="shell notes-grid">
+        <SectionHeading
+          eyebrow={copy.notesEyebrow}
+          title={copy.notesTitle}
+          description={copy.notesDescription}
+          size="compact"
+        />
+        <article class="note-card">
+          <div class="note-meta">
+            <span>{copy.published} {formattedPostDate}</span>
+            <span>{featuredPost.readingMinutes} {labels.minuteRead}</span>
+          </div>
+          <h3><a href={postHref}>{featuredPost.title}</a></h3>
+          <p>{featuredPost.excerpt}</p>
+          <ul class="tag-list" aria-label={labels.topics}>
+            {featuredPost.topics.map((topic) => <li>{topic}</li>)}
+          </ul>
+          <a class="text-link" href={postHref}>{copy.readNote}</a>
+        </article>
+      </div>
+    </section>
+  )}
+
+  <section class="section shell">
+    <CTA
+      eyebrow={copy.ctaEyebrow}
+      title={copy.ctaTitle}
+      description={copy.ctaDescription}
+      primary={{ label: labels.sendEmail, href: `mailto:${settings.contactEmail}` }}
+      secondary={{ label: labels.viewWork, href: routePath('work', language) }}
+    />
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    display: grid;
+    min-height: calc(100svh - var(--header-height));
+    grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 0.5fr);
+    gap: clamp(3rem, 10vw, 10rem);
+    align-items: end;
+    padding-block: clamp(5rem, 12vh, 10rem) var(--space-7);
+  }
+
+  .hero-copy h1 {
+    max-width: 14ch;
+    margin-top: var(--space-5);
+  }
+
+  .hero-description {
+    max-width: 62ch;
+    margin-top: var(--space-5);
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+    line-height: 1.55;
+  }
+
+  .hero .button-row {
+    margin-top: var(--space-6);
+  }
+
+  .hero-context {
+    margin-top: var(--space-6);
+    color: var(--color-ink-faint);
+    font-size: 0.72rem;
+    font-weight: 680;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+  }
+
+  .delivery-map {
+    border-top: 1px solid var(--color-line-strong);
+  }
+
+  .delivery-map > p {
+    padding-block: var(--space-3);
+    color: var(--color-accent-strong);
+    font-size: 0.68rem;
+    font-weight: 780;
+    letter-spacing: 0.085em;
+    text-transform: uppercase;
+  }
+
+  .delivery-map ol {
+    padding: 0;
+    list-style: none;
+  }
+
+  .delivery-map li {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr;
+    gap: var(--space-2);
+    padding-block: var(--space-3);
+    border-top: 1px solid var(--color-line);
+  }
+
+  .delivery-map span {
+    color: var(--color-accent);
+    font-size: 0.66rem;
+    font-weight: 760;
+  }
+
+  .delivery-map strong {
+    font-size: var(--step--1);
+    font-weight: 680;
+  }
+
+  .section-stack {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .case-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .capability-grid {
+    display: grid;
+    border-block: 1px solid var(--color-line-strong);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .capability-grid article {
+    padding: var(--space-5);
+  }
+
+  .capability-grid article + article {
+    border-inline-start: 1px solid var(--color-line);
+  }
+
+  .capability-grid article > p {
+    color: var(--color-accent);
+    font-size: 0.68rem;
+    font-weight: 780;
+  }
+
+  .capability-grid h3 {
+    margin-top: var(--space-5);
+    font-size: var(--step-1);
+  }
+
+  .capability-grid ul {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: var(--space-4);
+    padding: 0;
+    list-style: none;
+  }
+
+  .capability-grid li {
+    color: var(--color-ink-soft);
+    font-size: var(--step--1);
+  }
+
+  .notes-section {
+    background: var(--color-canvas-deep);
+  }
+
+  .notes-grid {
+    display: grid;
+    grid-template-columns: minmax(16rem, 0.75fr) minmax(0, 1.25fr);
+    gap: clamp(3rem, 9vw, 9rem);
+  }
+
+  .note-card {
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-line-strong);
+  }
+
+  .note-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    justify-content: space-between;
+    color: var(--color-ink-faint);
+    font-size: 0.68rem;
+    font-weight: 720;
+    text-transform: uppercase;
+  }
+
+  .note-card h3 {
+    max-width: 24ch;
+    margin-top: var(--space-6);
+    font-family: var(--font-serif);
+    font-size: var(--step-3);
+    font-weight: 500;
+  }
+
+  .note-card h3 a {
+    text-decoration: none;
+  }
+
+  .note-card > p {
+    max-width: var(--measure);
+    margin-top: var(--space-4);
+    color: var(--color-ink-soft);
+  }
+
+  .note-card .tag-list,
+  .note-card .text-link {
+    margin-top: var(--space-5);
+  }
+
+  @media (max-width: 70rem) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.42fr);
+      gap: var(--space-7);
+    }
+
+    .case-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .case-grid > :last-child {
+      grid-column: 1 / -1;
+    }
+
+    .capability-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .capability-grid article:nth-child(odd) {
+      border-inline-start: 0;
+    }
+
+    .capability-grid article:nth-child(n + 3) {
+      border-block-start: 1px solid var(--color-line);
+    }
+  }
+
+  @media (max-width: 48rem) {
+    .hero {
+      min-height: auto;
+      grid-template-columns: 1fr;
+      align-items: start;
+      padding-block: var(--space-8);
+    }
+
+    .delivery-map {
+      max-width: 32rem;
+    }
+
+    .notes-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 38rem) {
+    .case-grid,
+    .capability-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .case-grid > :last-child {
+      grid-column: auto;
+    }
+
+    .capability-grid article + article,
+    .capability-grid article:nth-child(n + 3) {
+      border-block-start: 1px solid var(--color-line);
+      border-inline-start: 0;
+    }
+  }
+</style>

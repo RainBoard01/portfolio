@@ -1,0 +1,369 @@
+---
+import {
+  alternatePathFor,
+  isNavigationItemActive,
+  navigationFor,
+  type NavigationItem,
+  type SiteLanguage,
+} from './navigation';
+
+interface Props {
+  language?: SiteLanguage;
+  currentPath?: string;
+  alternateHref?: string;
+  items?: NavigationItem[];
+  cvHref?: string;
+}
+
+const {
+  language = 'en',
+  currentPath = Astro.url.pathname,
+  alternateHref = alternatePathFor(currentPath, language),
+  items = navigationFor(language),
+  cvHref = '/cv.pdf',
+} = Astro.props;
+
+const copy = language === 'es'
+  ? {
+      home: 'Inicio de Yerko Acuña',
+      descriptor: 'Ingeniería · Liderazgo · EIRL',
+      nav: 'Navegación principal',
+      menu: 'Menú',
+      cv: 'Descargar CV',
+      language: 'Read in English',
+      languageShort: 'EN',
+    }
+  : {
+      home: 'Yerko Acuña home',
+      descriptor: 'Engineering · Leadership · EIRL',
+      nav: 'Primary navigation',
+      menu: 'Menu',
+      cv: 'Download CV',
+      language: 'Leer en español',
+      languageShort: 'ES',
+    };
+
+const homeHref = language === 'es' ? '/es/' : '/';
+const alternateLanguage = language === 'en' ? 'es' : 'en';
+---
+
+<header class="site-header">
+  <div class="shell header-inner">
+    <a class="wordmark" href={homeHref} aria-label={copy.home}>
+      <span class="wordmark-name">Yerko Acuña</span>
+      <span class="wordmark-detail">{copy.descriptor}</span>
+    </a>
+
+    <nav class="desktop-nav" aria-label={copy.nav}>
+      <ul>
+        {items.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              aria-current={isNavigationItemActive(currentPath, item.href) ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="header-actions">
+      <a
+        class="language-link"
+        href={alternateHref}
+        lang={alternateLanguage}
+        hreflang={alternateLanguage}
+        aria-label={copy.language}
+      >
+        {copy.languageShort}
+      </a>
+      <a class="cv-link" href={cvHref} download>{copy.cv}</a>
+    </div>
+
+    <details class="mobile-menu">
+      <summary>
+        <span>{copy.menu}</span>
+        <span class="menu-mark" aria-hidden="true"></span>
+      </summary>
+      <div class="mobile-panel">
+        <nav aria-label={copy.nav}>
+          <ul>
+            {items.map((item, index) => (
+              <li>
+                <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                <a
+                  href={item.href}
+                  aria-current={isNavigationItemActive(currentPath, item.href) ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div class="mobile-actions">
+          <a
+            href={alternateHref}
+            lang={alternateLanguage}
+            hreflang={alternateLanguage}
+          >
+            {copy.language}
+          </a>
+          <a href={cvHref} download>{copy.cv}</a>
+        </div>
+      </div>
+    </details>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: relative;
+    z-index: 30;
+    min-height: var(--header-height);
+    border-bottom: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-canvas) 92%, transparent);
+    backdrop-filter: blur(16px);
+  }
+
+  .header-inner {
+    display: grid;
+    min-height: var(--header-height);
+    grid-template-columns: minmax(10.5rem, 1fr) auto auto;
+    gap: clamp(1rem, 3vw, 2.6rem);
+    align-items: center;
+  }
+
+  .wordmark {
+    display: inline-flex;
+    width: fit-content;
+    flex-direction: column;
+    color: var(--color-ink);
+    line-height: 1.15;
+    text-decoration: none;
+  }
+
+  .wordmark:hover .wordmark-name {
+    color: var(--color-accent-strong);
+  }
+
+  .wordmark-name {
+    font-size: 0.92rem;
+    font-weight: 780;
+    letter-spacing: -0.025em;
+    transition: color var(--transition-fast);
+  }
+
+  .wordmark-detail {
+    margin-top: 0.22rem;
+    color: var(--color-ink-faint);
+    font-size: 0.62rem;
+    font-weight: 670;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .desktop-nav ul,
+  .mobile-panel ul {
+    padding: 0;
+    list-style: none;
+  }
+
+  .desktop-nav ul {
+    display: flex;
+    gap: clamp(0.65rem, 1.45vw, 1.4rem);
+    align-items: center;
+  }
+
+  .desktop-nav a,
+  .language-link,
+  .cv-link {
+    font-size: 0.72rem;
+    font-weight: 720;
+    letter-spacing: 0.025em;
+    text-decoration: none;
+  }
+
+  .desktop-nav a {
+    position: relative;
+    display: inline-flex;
+    padding-block: 0.7rem;
+    color: var(--color-ink-soft);
+  }
+
+  .desktop-nav a::after {
+    position: absolute;
+    right: 0;
+    bottom: 0.42rem;
+    left: 0;
+    height: 1px;
+    transform: scaleX(0);
+    background: var(--color-accent);
+    content: '';
+    transform-origin: right;
+    transition: transform var(--transition-fast);
+  }
+
+  .desktop-nav a:hover,
+  .desktop-nav a[aria-current='page'] {
+    color: var(--color-ink);
+  }
+
+  .desktop-nav a:hover::after,
+  .desktop-nav a[aria-current='page']::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+  }
+
+  .language-link {
+    display: inline-flex;
+    width: 2.45rem;
+    height: 2.45rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-line);
+    border-radius: 50%;
+  }
+
+  .language-link:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent-strong);
+  }
+
+  .cv-link {
+    display: inline-flex;
+    min-height: 2.5rem;
+    align-items: center;
+    padding-inline: 0.85rem;
+    border: 1px solid var(--color-ink);
+    border-radius: var(--radius-sm);
+    background: var(--color-ink);
+    color: var(--color-surface);
+  }
+
+  .cv-link:hover {
+    border-color: var(--color-accent-strong);
+    background: var(--color-accent-strong);
+  }
+
+  .mobile-menu {
+    display: none;
+  }
+
+  @media (max-width: 76rem) {
+    .header-inner {
+      grid-template-columns: 1fr auto;
+    }
+
+    .desktop-nav,
+    .header-actions {
+      display: none;
+    }
+
+    .mobile-menu {
+      display: block;
+    }
+
+    .mobile-menu summary {
+      display: flex;
+      min-height: 2.6rem;
+      gap: 0.7rem;
+      align-items: center;
+      padding-inline: 0.8rem;
+      border: 1px solid var(--color-line-strong);
+      border-radius: var(--radius-sm);
+      font-size: 0.74rem;
+      font-weight: 750;
+      list-style: none;
+    }
+
+    .mobile-menu summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .menu-mark {
+      position: relative;
+      width: 0.95rem;
+      height: 0.7rem;
+      border-block: 1px solid currentColor;
+    }
+
+    .mobile-menu[open] .menu-mark {
+      height: 1px;
+      border-block-end: 0;
+      transform: rotate(45deg);
+    }
+
+    .mobile-menu[open] .menu-mark::after {
+      position: absolute;
+      inset: 0;
+      border-block-start: 1px solid currentColor;
+      content: '';
+      transform: rotate(90deg);
+    }
+
+    .mobile-panel {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      left: 0;
+      padding: var(--space-5) var(--page-gutter) var(--space-6);
+      border-block: 1px solid var(--color-line);
+      background: var(--color-surface);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .mobile-panel li {
+      display: grid;
+      grid-template-columns: 2rem 1fr;
+      align-items: baseline;
+      border-bottom: 1px solid var(--color-line);
+    }
+
+    .mobile-panel li > span {
+      color: var(--color-accent);
+      font-size: 0.68rem;
+      font-weight: 750;
+    }
+
+    .mobile-panel li a {
+      padding-block: 0.72rem;
+      font-family: var(--font-serif);
+      font-size: var(--step-2);
+      font-weight: 520;
+      line-height: 1.1;
+      text-decoration: none;
+    }
+
+    .mobile-panel li a[aria-current='page'] {
+      color: var(--color-accent-strong);
+    }
+
+    .mobile-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-4);
+      margin-top: var(--space-5);
+    }
+
+    .mobile-actions a {
+      color: var(--color-accent-strong);
+      font-size: var(--step--1);
+      font-weight: 750;
+    }
+  }
+
+  @media (max-width: 28rem) {
+    .wordmark-detail {
+      display: none;
+    }
+  }
+</style>

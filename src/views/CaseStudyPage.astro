@@ -1,0 +1,395 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CaseCard from '@/components/CaseCard.astro';
+import CTA from '@/components/CTA.astro';
+import { getContent } from '@/data';
+import type { Locale } from '@/domain';
+import {
+  alternateLocale,
+  caseStudyPath,
+  routePath,
+  type CaseStudyId,
+} from '@/i18n';
+
+interface Props {
+  language: Locale;
+  caseId: CaseStudyId;
+}
+
+const { language, caseId } = Astro.props;
+const content = await getContent(language);
+const caseStudy = content.caseStudies.find((item) => item.id === caseId);
+
+if (!caseStudy) {
+  throw new Error(`Case study "${caseId}" is missing from the ${language} content snapshot.`);
+}
+
+const otherLanguage = alternateLocale(language);
+const relatedCases = content.caseStudies
+  .filter((item) => item.id !== caseStudy.id && item.collaborationMode === caseStudy.collaborationMode)
+  .slice(0, 2);
+const visibilityLabel = caseStudy.visibility === 'public'
+  ? content.labels.publicProject
+  : caseStudy.visibility === 'academic'
+    ? content.labels.academicProject
+    : content.labels.privateProject;
+const copy = language === 'es'
+  ? {
+      back: 'Volver a trabajo',
+      projectOverview: 'Resumen del proyecto',
+      role: 'Modalidad',
+      roleEmployment: 'Experiencia profesional',
+      roleCompany: 'Yerko Acuña EIRL',
+      roleAcademic: 'Proyecto académico',
+      decisions: 'Decisiones y enfoque',
+      results: 'Resultados',
+      related: 'Otros casos',
+      ctaEyebrow: 'Del contexto a producción',
+      ctaTitle: '¿Necesitas ownership técnico de punta a punta?',
+      ctaDescription:
+        'Puedo integrarme como senior engineer o liderar el desarrollo completo mediante Yerko Acuña EIRL.',
+      ctaPrimary: 'Iniciar una conversación',
+      ctaSecondary: 'Ver experiencia',
+      live: caseStudy.externalLinkLabel || 'Abrir implementación pública',
+    }
+  : {
+      back: 'Back to work',
+      projectOverview: 'Project overview',
+      role: 'Engagement',
+      roleEmployment: 'Professional experience',
+      roleCompany: 'Yerko Acuña EIRL',
+      roleAcademic: 'Academic project',
+      decisions: 'Decisions and approach',
+      results: 'Outcomes',
+      related: 'More work',
+      ctaEyebrow: 'From context to production',
+      ctaTitle: 'Do you need end-to-end technical ownership?',
+      ctaDescription:
+        'I can join as a senior engineer or lead a complete delivery engagement through Yerko Acuña EIRL.',
+      ctaPrimary: 'Start a conversation',
+      ctaSecondary: 'View experience',
+      live: caseStudy.externalLinkLabel || 'Open public implementation',
+    };
+const roleLabel = caseStudy.collaborationMode === 'employment'
+  ? copy.roleEmployment
+  : caseStudy.collaborationMode === 'company'
+    ? copy.roleCompany
+    : copy.roleAcademic;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: caseStudy.title,
+  description: caseStudy.summary,
+  author: { '@id': 'https://yerkoacuna.dev/#person' },
+  inLanguage: language,
+  url: new URL(caseStudyPath(caseId, language), Astro.site || 'https://yerkoacuna.dev').href,
+  ...(caseStudy.externalUrl ? { sameAs: caseStudy.externalUrl } : {}),
+};
+---
+
+<BaseLayout
+  title={caseStudy.title}
+  description={caseStudy.summary}
+  language={language}
+  alternateHref={caseStudyPath(caseId, otherLanguage)}
+  ogImage="/og.png"
+  ogType="article"
+  jsonLd={jsonLd}
+>
+  <article>
+    <header class="case-hero shell">
+      <a class="back-link" href={routePath('work', language)}>← {copy.back}</a>
+      <div class="case-hero-grid">
+        <div>
+          <p class="eyebrow">{caseStudy.category}</p>
+          <h1>{caseStudy.title}</h1>
+          <p class="case-summary">{caseStudy.summary}</p>
+          {caseStudy.externalUrl && (
+            <a
+              class="button button--secondary"
+              href={caseStudy.externalUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {copy.live} ↗
+            </a>
+          )}
+        </div>
+        <dl class="case-facts">
+          <div><dt>{language === 'es' ? 'Cliente' : 'Client'}</dt><dd>{caseStudy.client}</dd></div>
+          <div><dt>{language === 'es' ? 'Periodo' : 'Period'}</dt><dd>{caseStudy.period}</dd></div>
+          <div><dt>{copy.role}</dt><dd>{roleLabel}</dd></div>
+          <div><dt>{language === 'es' ? 'Visibilidad' : 'Visibility'}</dt><dd>{visibilityLabel}</dd></div>
+        </dl>
+      </div>
+    </header>
+
+    <section class="case-section section section--ruled">
+      <div class="shell narrative-grid">
+        <p class="eyebrow">{content.labels.context}</p>
+        <div class="prose-block"><h2>{copy.projectOverview}</h2><p>{caseStudy.context}</p></div>
+      </div>
+    </section>
+
+    <section class="case-section section section--ruled surface">
+      <div class="shell narrative-grid">
+        <p class="eyebrow">{content.labels.challenge}</p>
+        <div class="prose-block"><h2>{content.labels.challenge}</h2><p>{caseStudy.challenge}</p></div>
+      </div>
+    </section>
+
+    <section class="case-section section section--ruled">
+      <div class="shell split-grid">
+        <div>
+          <p class="eyebrow">{content.labels.responsibility}</p>
+          <h2>{content.labels.responsibility}</h2>
+          <ul class="numbered-list">
+            {caseStudy.responsibilities.map((item, index) => (
+              <li><span>{String(index + 1).padStart(2, '0')}</span><p>{item}</p></li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <p class="eyebrow">{content.labels.approach}</p>
+          <h2>{copy.decisions}</h2>
+          <ul class="numbered-list">
+            {caseStudy.approach.map((item, index) => (
+              <li><span>{String(index + 1).padStart(2, '0')}</span><p>{item}</p></li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="results section section--ruled">
+      <div class="shell results-grid">
+        <div>
+          <p class="eyebrow">{content.labels.outcome}</p>
+          <h2>{copy.results}</h2>
+        </div>
+        <ul>
+          {caseStudy.outcomes.map((outcome) => <li>{outcome}</li>)}
+        </ul>
+      </div>
+    </section>
+
+    <section class="technology section section--ruled">
+      <div class="shell narrative-grid">
+        <p class="eyebrow">{content.labels.technologies}</p>
+        <div>
+          <h2>{content.labels.technologies}</h2>
+          <ul class="tag-list large-tags">
+            {caseStudy.technologies.map((technology) => <li>{technology}</li>)}
+          </ul>
+        </div>
+      </div>
+    </section>
+  </article>
+
+  {relatedCases.length > 0 && (
+    <section class="section section--ruled shell">
+      <h2 class="related-title">{copy.related}</h2>
+      <div class="related-grid">
+        {relatedCases.map((item) => (
+          <CaseCard
+            caseStudy={item}
+            href={caseStudyPath(item.id as CaseStudyId, language)}
+            language={language}
+            featured={false}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section class="section shell">
+    <CTA
+      eyebrow={copy.ctaEyebrow}
+      title={copy.ctaTitle}
+      description={copy.ctaDescription}
+      primary={{ label: copy.ctaPrimary, href: routePath('contact', language) }}
+      secondary={{ label: copy.ctaSecondary, href: routePath('experience', language) }}
+      tone="mineral"
+    />
+  </section>
+</BaseLayout>
+
+<style>
+  .case-hero {
+    padding-block: var(--space-6) var(--space-9);
+  }
+
+  .back-link {
+    display: inline-flex;
+    margin-bottom: var(--space-7);
+    color: var(--color-ink-soft);
+    font-size: var(--step--1);
+    font-weight: 700;
+  }
+
+  .case-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(17rem, 0.5fr);
+    gap: clamp(3rem, 9vw, 9rem);
+    align-items: end;
+  }
+
+  .case-hero h1 {
+    max-width: 13ch;
+    margin-top: var(--space-4);
+  }
+
+  .case-summary {
+    max-width: 60ch;
+    margin-top: var(--space-5);
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+  }
+
+  .case-summary + .button {
+    margin-top: var(--space-6);
+  }
+
+  .case-facts {
+    border-top: 1px solid var(--color-line-strong);
+  }
+
+  .case-facts div {
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    gap: var(--space-4);
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .case-facts dt {
+    color: var(--color-ink-faint);
+    font-size: 0.68rem;
+    font-weight: 760;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .case-facts dd {
+    font-size: var(--step--1);
+    font-weight: 650;
+  }
+
+  .narrative-grid,
+  .results-grid {
+    display: grid;
+    grid-template-columns: minmax(10rem, 0.42fr) minmax(0, 1.58fr);
+    gap: clamp(2rem, 8vw, 8rem);
+  }
+
+  .prose-block h2,
+  .technology h2,
+  .results h2,
+  .split-grid h2 {
+    max-width: 17ch;
+    font-size: var(--step-3);
+  }
+
+  .prose-block p {
+    max-width: var(--measure);
+    margin-top: var(--space-5);
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+  }
+
+  .split-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(3rem, 8vw, 8rem);
+  }
+
+  .split-grid h2 {
+    margin-top: var(--space-4);
+  }
+
+  .numbered-list {
+    margin-top: var(--space-6);
+    padding: 0;
+    border-top: 1px solid var(--color-line-strong);
+    list-style: none;
+  }
+
+  .numbered-list li {
+    display: grid;
+    grid-template-columns: 2.2rem 1fr;
+    gap: var(--space-3);
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .numbered-list span {
+    color: var(--color-accent);
+    font-size: 0.68rem;
+    font-weight: 780;
+  }
+
+  .numbered-list p {
+    color: var(--color-ink-soft);
+  }
+
+  .results {
+    background: var(--color-accent-strong);
+    color: var(--color-on-accent);
+  }
+
+  .results :is(.eyebrow, h2) {
+    color: inherit;
+  }
+
+  .results-grid > ul {
+    display: grid;
+    gap: var(--space-4);
+    padding: 0;
+    list-style: none;
+  }
+
+  .results-grid > ul li {
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid rgb(255 255 255 / 25%);
+    font-family: var(--font-serif);
+    font-size: var(--step-2);
+    line-height: 1.25;
+  }
+
+  .large-tags {
+    margin-top: var(--space-5);
+  }
+
+  .large-tags li {
+    padding: 0.55rem 0.8rem;
+    font-size: var(--step--1);
+  }
+
+  .related-title {
+    margin-bottom: var(--space-6);
+    font-size: var(--step-3);
+  }
+
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .related-grid > :global(*) + :global(*) {
+    margin-left: -1px;
+  }
+
+  @media (max-width: 52rem) {
+    .case-hero-grid,
+    .narrative-grid,
+    .results-grid,
+    .split-grid,
+    .related-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .related-grid > :global(*) + :global(*) {
+      margin: -1px 0 0;
+    }
+  }
+</style>

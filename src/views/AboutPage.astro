@@ -1,0 +1,530 @@
+---
+import type { Locale } from '@/domain';
+import { getContent } from '@/data';
+import { routePath } from '@/i18n/routes';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CTA from '@/components/CTA.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+
+interface Props {
+  language: Locale;
+}
+
+const { language } = Astro.props;
+const content = await getContent(language);
+const { settings, labels, pages, profile } = content;
+
+const copy = language === 'es'
+  ? {
+      profileLabel: 'Perfil',
+      contextLabel: 'Contexto de trabajo',
+      storyEyebrow: 'Recorrido',
+      storyTitle: 'La amplitud técnica es útil cuando mantiene unido el contexto.',
+      storyDescription:
+        'Mi perfil no se organiza alrededor de una lista de frameworks, sino alrededor de la responsabilidad sobre el sistema completo.',
+      principlesEyebrow: 'Principios',
+      principlesTitle: 'Cómo tomo decisiones cuando el problema todavía está incompleto.',
+      principlesDescription:
+        'Estas reglas mantienen la arquitectura conectada con la operación y con las personas que sostendrán el producto.',
+      expertiseEyebrow: 'Expertise',
+      expertiseTitle: 'Capacidades técnicas aplicadas como un sistema.',
+      expertiseDescription:
+        'Frontend, backend, datos, integraciones y entrega se diseñan como partes de un mismo flujo.',
+      domainsEyebrow: 'Contextos operacionales',
+      domainsTitle: 'Dominios donde el vocabulario y la trazabilidad importan.',
+      educationEyebrow: 'Formación',
+      educationTitle: 'Educación formal y aprendizaje práctico continuo.',
+      languages: 'Idiomas',
+      ctaEyebrow: 'Continuar',
+      ctaTitle: 'La mejor forma de evaluar el perfil es revisar las decisiones y el trabajo.',
+      ctaDescription:
+        'Explora la trayectoria profesional y los casos de estudio, o descarga el CV para una lectura más tradicional.',
+      viewExperience: 'Ver experiencia',
+    }
+  : {
+      profileLabel: 'Profile',
+      contextLabel: 'Working context',
+      storyEyebrow: 'Background',
+      storyTitle: 'Technical breadth is useful when it keeps context connected.',
+      storyDescription:
+        'My profile is organized around responsibility for the complete system, not around a list of frameworks.',
+      principlesEyebrow: 'Principles',
+      principlesTitle: 'How I make decisions while the problem is still incomplete.',
+      principlesDescription:
+        'These rules keep architecture connected to the operation and to the people who will sustain the product.',
+      expertiseEyebrow: 'Expertise',
+      expertiseTitle: 'Technical capabilities applied as one system.',
+      expertiseDescription:
+        'Frontend, backend, data, integrations, and delivery are designed as parts of one workflow.',
+      domainsEyebrow: 'Operational contexts',
+      domainsTitle: 'Domains where vocabulary and traceability matter.',
+      educationEyebrow: 'Education',
+      educationTitle: 'Formal education and continuous practical learning.',
+      languages: 'Languages',
+      ctaEyebrow: 'Continue',
+      ctaTitle: 'The clearest way to evaluate this profile is through decisions and delivered work.',
+      ctaDescription:
+        'Explore the professional timeline and case studies, or download the résumé for a more traditional view.',
+      viewExperience: 'View experience',
+    };
+---
+
+<BaseLayout
+  title={settings.navigation.about}
+  description={pages.about.description}
+  language={language}
+  ogImage="/og.png"
+  ogType="profile"
+>
+  <section class="page-hero shell" aria-labelledby="about-title">
+    <div class="page-hero-main">
+      <p class="eyebrow">{pages.about.eyebrow}</p>
+      <h1 id="about-title">{pages.about.title}</h1>
+      <p class="page-description">{pages.about.description}</p>
+    </div>
+    <aside class="profile-card" aria-label={copy.profileLabel}>
+      <p>{copy.profileLabel}</p>
+      <h2>{profile.name}</h2>
+      <dl>
+        <div>
+          <dt>{profile.role}</dt>
+          <dd>{profile.secondaryRole}</dd>
+        </div>
+        <div>
+          <dt>{copy.contextLabel}</dt>
+          <dd>{profile.locationLabel} · {profile.remoteLabel}</dd>
+        </div>
+      </dl>
+    </aside>
+  </section>
+
+  <section class="section section--ruled">
+    <div class="shell story-grid">
+      <SectionHeading
+        eyebrow={copy.storyEyebrow}
+        title={copy.storyTitle}
+        description={copy.storyDescription}
+        size="compact"
+      />
+      <div class="biography prose">
+        <p class="intro">{profile.introduction}</p>
+        {profile.biography.map((paragraph) => <p>{paragraph}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section surface section--ruled">
+    <div class="shell section-stack">
+      <SectionHeading
+        eyebrow={copy.principlesEyebrow}
+        title={copy.principlesTitle}
+        description={copy.principlesDescription}
+      />
+      <ol class="principles-grid">
+        {profile.principles.map((principle, index) => (
+          <li>
+            <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            <p>{principle}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="shell section-stack">
+      <SectionHeading
+        eyebrow={copy.expertiseEyebrow}
+        title={copy.expertiseTitle}
+        description={copy.expertiseDescription}
+      />
+      <div class="expertise-grid">
+        {profile.expertise.map((group, index) => (
+          <article>
+            <header>
+              <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+              <h3>{group.title}</h3>
+            </header>
+            <ul>
+              {group.items.map((item) => <li>{item}</li>)}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section domain-section section--ruled">
+    <div class="shell domain-grid">
+      <SectionHeading
+        eyebrow={copy.domainsEyebrow}
+        title={copy.domainsTitle}
+        size="compact"
+      />
+      <ul>
+        {profile.domains.map((domain, index) => (
+          <li>
+            <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            <strong>{domain}</strong>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section surface section--ruled">
+    <div class="shell section-stack">
+      <SectionHeading
+        eyebrow={copy.educationEyebrow}
+        title={copy.educationTitle}
+      />
+      <div class="education-list">
+        {profile.education.map((item) => (
+          <article>
+            <div class="education-period">{item.period}</div>
+            <div class="education-copy">
+              <p>{item.institution}</p>
+              <h3>{item.qualification}</h3>
+              <p>{item.description}</p>
+              {item.technologies.length > 0 && (
+                <ul class="tag-list">
+                  {item.technologies.map((technology) => <li>{technology}</li>)}
+                </ul>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
+      <div class="languages-block">
+        <h3>{copy.languages}</h3>
+        <dl>
+          {profile.languages.map((item) => (
+            <div>
+              <dt>{item.language}</dt>
+              <dd>{item.level}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="section shell">
+    <CTA
+      eyebrow={copy.ctaEyebrow}
+      title={copy.ctaTitle}
+      description={copy.ctaDescription}
+      primary={{ label: copy.viewExperience, href: routePath('experience', language) }}
+      secondary={{ label: labels.downloadCv, href: settings.cvPath, download: true }}
+      tone="mineral"
+    />
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    display: grid;
+    min-height: 42rem;
+    grid-template-columns: minmax(0, 1.55fr) minmax(17rem, 0.45fr);
+    gap: clamp(3rem, 10vw, 10rem);
+    align-items: end;
+    padding-block: var(--space-9) var(--space-7);
+  }
+
+  .page-hero-main h1 {
+    max-width: 14ch;
+    margin-top: var(--space-5);
+  }
+
+  .page-description {
+    max-width: 62ch;
+    margin-top: var(--space-5);
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+  }
+
+  .profile-card {
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-line-strong);
+  }
+
+  .profile-card > p,
+  .profile-card dt {
+    color: var(--color-accent-strong);
+    font-size: 0.66rem;
+    font-weight: 780;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .profile-card h2 {
+    margin-top: var(--space-4);
+    font-family: var(--font-sans);
+    font-size: var(--step-2);
+    font-weight: 650;
+    letter-spacing: -0.035em;
+  }
+
+  .profile-card dl {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+  }
+
+  .profile-card dl > div {
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-line);
+  }
+
+  .profile-card dd {
+    margin-top: var(--space-2);
+    color: var(--color-ink-soft);
+    font-size: var(--step--1);
+  }
+
+  .story-grid,
+  .domain-grid {
+    display: grid;
+    grid-template-columns: minmax(16rem, 0.7fr) minmax(0, 1.3fr);
+    gap: clamp(3rem, 9vw, 9rem);
+  }
+
+  .biography {
+    font-size: var(--step-1);
+  }
+
+  .biography .intro {
+    color: var(--color-accent-strong);
+    font-family: var(--font-serif);
+    font-size: var(--step-2);
+    line-height: 1.4;
+  }
+
+  .section-stack {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .principles-grid {
+    display: grid;
+    padding: 0;
+    border-block: 1px solid var(--color-line-strong);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    list-style: none;
+  }
+
+  .principles-grid li {
+    min-height: 17rem;
+    padding: var(--space-5);
+  }
+
+  .principles-grid li + li {
+    border-inline-start: 1px solid var(--color-line);
+  }
+
+  .principles-grid span,
+  .expertise-grid header span,
+  .domain-grid li span {
+    color: var(--color-accent);
+    font-size: 0.68rem;
+    font-weight: 780;
+  }
+
+  .principles-grid p {
+    margin-top: var(--space-7);
+    font-family: var(--font-serif);
+    font-size: var(--step-1);
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
+  .expertise-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .expertise-grid article {
+    padding: var(--space-5);
+    border: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-surface) 55%, transparent);
+  }
+
+  .expertise-grid header {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr;
+    gap: var(--space-3);
+    align-items: baseline;
+  }
+
+  .expertise-grid h3 {
+    font-size: var(--step-2);
+  }
+
+  .expertise-grid ul {
+    display: grid;
+    gap: 0.55rem;
+    margin-top: var(--space-5);
+    padding: var(--space-4) 0 0 2.25rem;
+    border-top: 1px solid var(--color-line);
+    list-style: none;
+  }
+
+  .expertise-grid li {
+    color: var(--color-ink-soft);
+    font-size: var(--step--1);
+  }
+
+  .domain-section {
+    background: var(--color-canvas-deep);
+  }
+
+  .domain-grid > ul {
+    padding: 0;
+    border-top: 1px solid var(--color-line-strong);
+    list-style: none;
+  }
+
+  .domain-grid li {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr;
+    gap: var(--space-3);
+    align-items: baseline;
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .domain-grid li strong {
+    font-family: var(--font-serif);
+    font-size: var(--step-1);
+    font-weight: 520;
+  }
+
+  .education-list {
+    border-top: 1px solid var(--color-line-strong);
+  }
+
+  .education-list article {
+    display: grid;
+    grid-template-columns: minmax(8rem, 0.35fr) minmax(0, 1.65fr);
+    gap: clamp(2rem, 7vw, 7rem);
+    padding-block: var(--space-6);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .education-period {
+    color: var(--color-accent-strong);
+    font-size: var(--step--1);
+    font-weight: 760;
+  }
+
+  .education-copy > p:first-child {
+    color: var(--color-ink-faint);
+    font-size: var(--step--1);
+    font-weight: 680;
+  }
+
+  .education-copy h3 {
+    margin-top: var(--space-2);
+    font-size: var(--step-2);
+  }
+
+  .education-copy h3 + p {
+    max-width: var(--measure);
+    margin-top: var(--space-4);
+    color: var(--color-ink-soft);
+  }
+
+  .education-copy .tag-list {
+    margin-top: var(--space-4);
+  }
+
+  .languages-block {
+    display: grid;
+    grid-template-columns: minmax(8rem, 0.35fr) minmax(0, 1.65fr);
+    gap: clamp(2rem, 7vw, 7rem);
+    padding-top: var(--space-5);
+  }
+
+  .languages-block h3 {
+    color: var(--color-ink-faint);
+    font-size: 0.68rem;
+    font-weight: 780;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .languages-block dl > div {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: space-between;
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .languages-block dt {
+    font-weight: 720;
+  }
+
+  .languages-block dd {
+    color: var(--color-ink-soft);
+  }
+
+  @media (max-width: 65rem) {
+    .principles-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .principles-grid li:nth-child(odd) {
+      border-inline-start: 0;
+    }
+
+    .principles-grid li:nth-child(n + 3) {
+      border-block-start: 1px solid var(--color-line);
+    }
+  }
+
+  @media (max-width: 48rem) {
+    .page-hero,
+    .story-grid,
+    .domain-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .page-hero {
+      min-height: auto;
+      padding-block: var(--space-8);
+    }
+
+    .expertise-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 36rem) {
+    .principles-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .principles-grid li {
+      min-height: auto;
+    }
+
+    .principles-grid li + li,
+    .principles-grid li:nth-child(n + 3) {
+      border-block-start: 1px solid var(--color-line);
+      border-inline-start: 0;
+    }
+
+    .education-list article,
+    .languages-block {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+
+    .languages-block dl > div {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+</style>

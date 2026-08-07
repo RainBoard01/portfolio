@@ -1,0 +1,22 @@
+---
+import CaseStudyPage from '@/views/CaseStudyPage.astro';
+import {
+  CASE_STUDY_SLUGS,
+  type CaseStudyId,
+} from '@/i18n';
+
+export function getStaticPaths() {
+  return Object.entries(CASE_STUDY_SLUGS).map(([caseId, slugs]) => ({
+    params: { slug: slugs.en },
+    props: { caseId: caseId as CaseStudyId },
+  }));
+}
+
+interface Props {
+  caseId: CaseStudyId;
+}
+
+const { caseId } = Astro.props;
+---
+
+<CaseStudyPage language="en" caseId={caseId} />

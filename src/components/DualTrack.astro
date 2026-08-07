@@ -1,0 +1,147 @@
+---
+export interface TrackItem {
+  eyebrow?: string;
+  title: string;
+  description: string;
+  href: string;
+  linkLabel: string;
+  details?: string[];
+}
+
+interface Props {
+  tracks: TrackItem[];
+  ariaLabel?: string;
+}
+
+const { tracks, ariaLabel = 'Ways to work together' } = Astro.props;
+---
+
+<div class="dual-track" aria-label={ariaLabel}>
+  {tracks.map((track, index) => (
+    <article class="track-card">
+      <div class="track-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</div>
+      <div class="track-content">
+        {track.eyebrow && <p class="eyebrow">{track.eyebrow}</p>}
+        <h3>{track.title}</h3>
+        <p class="track-description">{track.description}</p>
+        {track.details && track.details.length > 0 && (
+          <ul>
+            {track.details.map((detail) => <li>{detail}</li>)}
+          </ul>
+        )}
+        <a class="text-link" href={track.href} aria-label={`${track.linkLabel}: ${track.title}`}>
+          {track.linkLabel}
+        </a>
+      </div>
+    </article>
+  ))}
+</div>
+
+<style>
+  .dual-track {
+    display: grid;
+    border-block: 1px solid var(--color-line-strong);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .track-card {
+    display: grid;
+    min-height: 27rem;
+    grid-template-columns: 3.4rem 1fr;
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    padding: clamp(1.5rem, 4vw, 3.5rem);
+    background: color-mix(in srgb, var(--color-surface) 58%, transparent);
+    transition: background-color var(--transition-fast);
+  }
+
+  .track-card + .track-card {
+    border-inline-start: 1px solid var(--color-line-strong);
+  }
+
+  .track-card:hover {
+    background: var(--color-surface);
+  }
+
+  .track-index {
+    color: var(--color-accent);
+    font-size: 0.7rem;
+    font-weight: 780;
+    letter-spacing: 0.08em;
+  }
+
+  .track-content {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  h3 {
+    max-width: 16ch;
+    margin-top: var(--space-4);
+    font-family: var(--font-serif);
+    font-size: var(--step-3);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+  }
+
+  .track-description {
+    max-width: 48ch;
+    margin-top: var(--space-4);
+    color: var(--color-ink-soft);
+  }
+
+  ul {
+    display: grid;
+    width: 100%;
+    gap: 0.45rem;
+    margin-top: var(--space-5);
+    padding: 0;
+    border-top: 1px solid var(--color-line);
+    list-style: none;
+  }
+
+  li {
+    position: relative;
+    padding: 0.65rem 0 0 1rem;
+    color: var(--color-ink-soft);
+    font-size: var(--step--1);
+  }
+
+  li::before {
+    position: absolute;
+    top: 1.15rem;
+    left: 0;
+    width: 0.28rem;
+    height: 0.28rem;
+    border-radius: 50%;
+    background: var(--color-accent);
+    content: '';
+  }
+
+  .text-link {
+    margin-top: auto;
+    padding-top: var(--space-6);
+  }
+
+  @media (max-width: 47rem) {
+    .dual-track {
+      grid-template-columns: 1fr;
+    }
+
+    .track-card {
+      min-height: auto;
+      grid-template-columns: 2rem 1fr;
+    }
+
+    .track-card + .track-card {
+      border-block-start: 1px solid var(--color-line-strong);
+      border-inline-start: 0;
+    }
+  }
+
+  @media (max-width: 28rem) {
+    .track-card {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,498 @@
+---
+import type { Locale } from '@/domain';
+import { getContent } from '@/data';
+import { caseStudyPath, routePath, type CaseStudyId } from '@/i18n/routes';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CaseCard from '@/components/CaseCard.astro';
+import CTA from '@/components/CTA.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import ServiceCard from '@/components/ServiceCard.astro';
+
+interface Props {
+  language: Locale;
+}
+
+const { language } = Astro.props;
+const content = await getContent(language);
+const { settings, labels, pages, company, services, caseStudies } = content;
+const companyCases = caseStudies
+  .filter((item) => item.collaborationMode === 'company')
+  .sort((a, b) => a.sortOrder - b.sortOrder);
+
+const copy = language === 'es'
+  ? {
+      legalLabel: 'Entidad de contratación',
+      operatingLabel: 'Modelo de trabajo',
+      heroCta: 'Describir un proyecto',
+      heroWork: 'Ver caso de la EIRL',
+      fitEyebrow: 'Buen encaje',
+      fitTitle: 'Para organizaciones que necesitan continuidad entre decisión y entrega.',
+      fitDescription:
+        'El mejor resultado aparece cuando existe acceso directo a quienes conocen la operación y voluntad de priorizar por valor y riesgo.',
+      servicesEyebrow: 'Servicios',
+      servicesTitle: 'Un alcance claro, con profundidad donde el sistema lo exige.',
+      servicesDescription:
+        'Los servicios pueden contratarse como una etapa enfocada o conectarse en un proyecto completo.',
+      processEyebrow: 'Proceso',
+      processTitle: 'Avanzar en incrementos útiles sin perder el contexto completo.',
+      processDescription:
+        'Cada etapa produce decisiones verificables y reduce incertidumbre antes de ampliar el compromiso.',
+      steps: [
+        {
+          title: 'Comprender la operación',
+          description: 'Mapear actores, decisiones, excepciones, evidencia y restricciones antes de diseñar pantallas.',
+        },
+        {
+          title: 'Definir límites y alcance',
+          description: 'Convertir el flujo en un modelo de dominio, arquitectura y orden de entrega compartido.',
+        },
+        {
+          title: 'Construir y validar',
+          description: 'Entregar verticales funcionales que conecten interfaz, servicios, datos e integraciones.',
+        },
+        {
+          title: 'Desplegar y evolucionar',
+          description: 'Automatizar la entrega, observar el uso real y dejar una ruta mantenible de continuidad.',
+        },
+      ],
+      commitmentsEyebrow: 'Compromisos',
+      commitmentsTitle: 'Qué debe quedar después de una entrega.',
+      proofEyebrow: 'Prueba en producción',
+      proofTitle: 'Una relación de largo plazo con una operación real.',
+      proofDescription:
+        'El caso de la EIRL muestra descubrimiento, desarrollo, despliegue y evolución continua dentro de una misma responsabilidad técnica.',
+      ctaEyebrow: 'Iniciar una conversación',
+      ctaTitle: 'Un buen primer mensaje describe el problema, no una lista cerrada de funciones.',
+      ctaDescription:
+        'Comparte el flujo actual, quién lo usa, qué está fallando y qué resultado necesita la organización. Responderé desde el alcance y el riesgo técnico.',
+    }
+  : {
+      legalLabel: 'Contracting entity',
+      operatingLabel: 'Operating model',
+      heroCta: 'Describe a project',
+      heroWork: 'View company case',
+      fitEyebrow: 'Good fit',
+      fitTitle: 'For organizations that need continuity between decisions and delivery.',
+      fitDescription:
+        'The strongest results come with direct access to the people who understand the operation and a willingness to prioritize by value and risk.',
+      servicesEyebrow: 'Services',
+      servicesTitle: 'A clear scope, with depth where the system requires it.',
+      servicesDescription:
+        'Services can be engaged as a focused phase or connected into a complete software delivery.',
+      processEyebrow: 'Process',
+      processTitle: 'Move in useful increments without losing the complete context.',
+      processDescription:
+        'Each stage produces verifiable decisions and reduces uncertainty before expanding the commitment.',
+      steps: [
+        {
+          title: 'Understand the operation',
+          description: 'Map actors, decisions, exceptions, evidence, and constraints before designing screens.',
+        },
+        {
+          title: 'Define boundaries and scope',
+          description: 'Turn the workflow into a shared domain model, architecture, and delivery sequence.',
+        },
+        {
+          title: 'Build and validate',
+          description: 'Deliver working vertical slices that connect interface, services, data, and integrations.',
+        },
+        {
+          title: 'Deploy and evolve',
+          description: 'Automate delivery, learn from real use, and leave a maintainable path forward.',
+        },
+      ],
+      commitmentsEyebrow: 'Commitments',
+      commitmentsTitle: 'What should remain after delivery.',
+      proofEyebrow: 'Production evidence',
+      proofTitle: 'A long-term relationship with a real operation.',
+      proofDescription:
+        'The company case connects discovery, development, deployment, and continued evolution through one line of technical responsibility.',
+      ctaEyebrow: 'Start a conversation',
+      ctaTitle: 'A useful first message describes the problem, not a fixed feature list.',
+      ctaDescription:
+        'Share the current workflow, who uses it, what is failing, and the outcome the organization needs. I will respond in terms of scope and technical risk.',
+    };
+---
+
+<BaseLayout
+  title={settings.navigation.services}
+  description={pages.services.description}
+  language={language}
+  ogImage="/og.png"
+>
+  <section class="page-hero shell" aria-labelledby="services-title">
+    <div class="page-hero-main">
+      <p class="eyebrow">{pages.services.eyebrow}</p>
+      <h1 id="services-title">{pages.services.title}</h1>
+      <p class="page-description">{pages.services.description}</p>
+      <div class="button-row">
+        <a class="button" href={`mailto:${company.contactEmail}`}>{copy.heroCta}</a>
+        {companyCases[0] && (
+          <a
+            class="button button--secondary"
+            href={caseStudyPath(companyCases[0].id as CaseStudyId, language)}
+          >
+            {copy.heroWork}
+          </a>
+        )}
+      </div>
+    </div>
+
+    <aside class="company-card">
+      <p>{copy.legalLabel}</p>
+      <h2>{company.legalName}</h2>
+      <div>
+        <span>{copy.operatingLabel}</span>
+        <p>{company.operatingModel}</p>
+      </div>
+    </aside>
+  </section>
+
+  <section class="section company-intro-section section--ruled">
+    <div class="shell company-intro">
+      <SectionHeading
+        eyebrow={copy.fitEyebrow}
+        title={copy.fitTitle}
+        description={copy.fitDescription}
+        size="compact"
+      />
+      <div>
+        <div class="company-summary prose">
+          {company.summary.map((paragraph) => <p>{paragraph}</p>)}
+        </div>
+        <ul class="fit-list">
+          {company.bestFor.map((item, index) => (
+            <li>
+              <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+              <strong>{item}</strong>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="services-list">
+    <div class="shell section-stack">
+      <SectionHeading
+        eyebrow={copy.servicesEyebrow}
+        title={copy.servicesTitle}
+        description={copy.servicesDescription}
+      />
+      <div class="service-grid">
+        {services
+          .slice()
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map((service, index) => (
+            <ServiceCard
+              service={service}
+              language={language}
+              index={index}
+              ctaHref={`mailto:${company.contactEmail}?subject=${encodeURIComponent(service.title)}`}
+            />
+          ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section process-section section--ruled">
+    <div class="shell section-stack">
+      <SectionHeading
+        eyebrow={copy.processEyebrow}
+        title={copy.processTitle}
+        description={copy.processDescription}
+      />
+      <ol class="process-grid">
+        {copy.steps.map((step, index) => (
+          <li>
+            <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            <h3>{step.title}</h3>
+            <p>{step.description}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section surface section--ruled">
+    <div class="shell commitments-grid">
+      <SectionHeading
+        eyebrow={copy.commitmentsEyebrow}
+        title={copy.commitmentsTitle}
+        size="compact"
+      />
+      <ol>
+        {company.commitments.map((commitment, index) => (
+          <li>
+            <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            <p>{commitment}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  {companyCases[0] && (
+    <section class="section">
+      <div class="shell proof-grid">
+        <SectionHeading
+          eyebrow={copy.proofEyebrow}
+          title={copy.proofTitle}
+          description={copy.proofDescription}
+          size="compact"
+        />
+        <CaseCard
+          caseStudy={companyCases[0]}
+          href={caseStudyPath(companyCases[0].id as CaseStudyId, language)}
+          language={language}
+          readLabel={labels.readCaseStudy}
+          featured
+        />
+      </div>
+    </section>
+  )}
+
+  <section class="section shell">
+    <CTA
+      eyebrow={copy.ctaEyebrow}
+      title={copy.ctaTitle}
+      description={copy.ctaDescription}
+      primary={{ label: labels.discussProject, href: `mailto:${company.contactEmail}` }}
+      secondary={{ label: labels.viewAllWork, href: routePath('work', language) }}
+      tone="mineral"
+    />
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    display: grid;
+    min-height: 43rem;
+    grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.55fr);
+    gap: clamp(3rem, 10vw, 10rem);
+    align-items: end;
+    padding-block: var(--space-9) var(--space-7);
+  }
+
+  .page-hero h1 {
+    max-width: 14ch;
+    margin-top: var(--space-5);
+  }
+
+  .page-description {
+    max-width: var(--measure);
+    margin-top: var(--space-5);
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+  }
+
+  .page-hero .button-row {
+    margin-top: var(--space-6);
+  }
+
+  .company-card {
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-line-strong);
+  }
+
+  .company-card > p,
+  .company-card span {
+    color: var(--color-accent-strong);
+    font-size: 0.66rem;
+    font-weight: 780;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .company-card h2 {
+    margin-top: var(--space-4);
+    font-family: var(--font-sans);
+    font-size: var(--step-2);
+    font-weight: 650;
+    letter-spacing: -0.035em;
+  }
+
+  .company-card > div {
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-line);
+  }
+
+  .company-card > div p {
+    margin-top: var(--space-2);
+    color: var(--color-ink-soft);
+    font-size: var(--step--1);
+  }
+
+  .company-intro-section {
+    background: var(--color-canvas-deep);
+  }
+
+  .company-intro,
+  .commitments-grid,
+  .proof-grid {
+    display: grid;
+    grid-template-columns: minmax(16rem, 0.7fr) minmax(0, 1.3fr);
+    gap: clamp(3rem, 9vw, 9rem);
+  }
+
+  .company-summary {
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+  }
+
+  .fit-list {
+    margin-top: var(--space-6);
+    padding: 0;
+    border-top: 1px solid var(--color-line-strong);
+    list-style: none;
+  }
+
+  .fit-list li {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr;
+    gap: var(--space-3);
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .fit-list span,
+  .process-grid > li > span,
+  .commitments-grid li span {
+    color: var(--color-accent);
+    font-size: 0.68rem;
+    font-weight: 780;
+  }
+
+  .fit-list strong {
+    font-size: var(--step--1);
+    font-weight: 680;
+  }
+
+  .section-stack {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .service-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .process-section {
+    background: var(--color-ink);
+    color: #ece9e0;
+  }
+
+  .process-section :global(.section-heading h2) {
+    color: #f4f0e7;
+  }
+
+  .process-section :global(.section-heading .eyebrow) {
+    color: #9fb8aa;
+  }
+
+  .process-section :global(.heading-description) {
+    color: #b8beb9;
+  }
+
+  .process-grid {
+    display: grid;
+    padding: 0;
+    border-block: 1px solid #56615b;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    list-style: none;
+  }
+
+  .process-grid li {
+    min-height: 24rem;
+    padding: var(--space-5);
+  }
+
+  .process-grid li + li {
+    border-inline-start: 1px solid #46514b;
+  }
+
+  .process-grid h3 {
+    margin-top: var(--space-7);
+    color: #f4f0e7;
+    font-family: var(--font-serif);
+    font-size: var(--step-2);
+    font-weight: 500;
+  }
+
+  .process-grid p {
+    margin-top: var(--space-4);
+    color: #b8beb9;
+    font-size: var(--step--1);
+  }
+
+  .commitments-grid > ol {
+    padding: 0;
+    border-top: 1px solid var(--color-line-strong);
+    list-style: none;
+  }
+
+  .commitments-grid li {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr;
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .commitments-grid li p {
+    font-family: var(--font-serif);
+    font-size: var(--step-1);
+    line-height: 1.35;
+  }
+
+  @media (max-width: 62rem) {
+    .process-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .process-grid li:nth-child(odd) {
+      border-inline-start: 0;
+    }
+
+    .process-grid li:nth-child(n + 3) {
+      border-block-start: 1px solid #46514b;
+    }
+  }
+
+  @media (max-width: 48rem) {
+    .page-hero,
+    .company-intro,
+    .commitments-grid,
+    .proof-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .page-hero {
+      min-height: auto;
+      padding-block: var(--space-8);
+    }
+
+    .service-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 36rem) {
+    .process-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .process-grid li {
+      min-height: auto;
+    }
+
+    .process-grid li + li,
+    .process-grid li:nth-child(n + 3) {
+      border-block-start: 1px solid #46514b;
+      border-inline-start: 0;
+    }
+  }
+</style>

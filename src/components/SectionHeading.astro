@@ -1,0 +1,116 @@
+---
+interface Props {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  as?: 'h1' | 'h2' | 'h3';
+  id?: string;
+  size?: 'hero' | 'section' | 'compact';
+  align?: 'start' | 'center';
+}
+
+const {
+  eyebrow,
+  title,
+  description,
+  as: Heading = 'h2',
+  id,
+  size = 'section',
+  align = 'start',
+} = Astro.props as Props;
+const hasBody = Boolean(description) || Astro.slots.has('default');
+---
+
+<header class:list={['section-heading', `section-heading--${size}`, `section-heading--${align}`]}>
+  <div class="heading-copy">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <Heading id={id}>{title}</Heading>
+    {hasBody && (
+      <div class="heading-description">
+        {description ? <p>{description}</p> : <slot />}
+      </div>
+    )}
+  </div>
+  {Astro.slots.has('actions') && <div class="heading-actions"><slot name="actions" /></div>}
+</header>
+
+<style>
+  .section-heading {
+    display: flex;
+    gap: var(--space-5);
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .heading-copy {
+    max-width: 72rem;
+  }
+
+  .eyebrow + :is(h1, h2, h3) {
+    margin-top: var(--space-4);
+  }
+
+  h1,
+  h2,
+  h3 {
+    max-width: 18ch;
+  }
+
+  .section-heading--hero h1,
+  .section-heading--hero h2 {
+    max-width: 14ch;
+    font-size: var(--step-5);
+  }
+
+  .section-heading--compact h2,
+  .section-heading--compact h3 {
+    font-family: var(--font-sans);
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  .heading-description {
+    max-width: var(--measure);
+    margin-top: var(--space-5);
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+    line-height: 1.55;
+  }
+
+  .section-heading--compact .heading-description {
+    max-width: var(--measure-tight);
+    margin-top: var(--space-3);
+    font-size: var(--step-0);
+  }
+
+  .section-heading--center {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .section-heading--center :is(h1, h2, h3),
+  .section-heading--center .heading-description {
+    margin-inline: auto;
+  }
+
+  .heading-actions {
+    display: flex;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding-bottom: 0.3rem;
+  }
+
+  @media (max-width: 46rem) {
+    .section-heading {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .heading-actions {
+      width: 100%;
+      padding-bottom: 0;
+    }
+  }
+</style>

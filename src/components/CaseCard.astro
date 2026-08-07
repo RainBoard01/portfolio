@@ -1,0 +1,202 @@
+---
+import type { CaseStudy, Locale } from '@/domain';
+
+interface Props {
+  caseStudy: CaseStudy;
+  href: string;
+  language?: Locale;
+  readLabel?: string;
+  index?: number;
+  featured?: boolean;
+}
+
+const {
+  caseStudy,
+  href,
+  language = 'en',
+  readLabel = language === 'es' ? 'Leer caso de estudio' : 'Read case study',
+  index,
+  featured = caseStudy.featured,
+} = Astro.props;
+
+const visibilityLabels = language === 'es'
+  ? { public: 'Público', private: 'Proyecto privado', academic: 'Académico' }
+  : { public: 'Public', private: 'Private engagement', academic: 'Academic' };
+const modeLabels = language === 'es'
+  ? { employment: 'Experiencia profesional', company: 'Yerko Acuña EIRL', academic: 'Proyecto académico' }
+  : { employment: 'Professional experience', company: 'Yerko Acuña EIRL', academic: 'Academic project' };
+const titleId = `case-${caseStudy.id}-title`;
+---
+
+<article class:list={['case-card', { 'case-card--featured': featured }]} aria-labelledby={titleId}>
+  <header class="case-meta">
+    {typeof index === 'number' && (
+      <span class="case-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+    )}
+    <span>{caseStudy.category}</span>
+    <span>{caseStudy.period}</span>
+    <span>{visibilityLabels[caseStudy.visibility]}</span>
+  </header>
+
+  <div class="case-body">
+    <div>
+      <p class="case-mode">{modeLabels[caseStudy.collaborationMode]}</p>
+      <h3 id={titleId}><a href={href}>{caseStudy.title}</a></h3>
+      <p class="case-client">{caseStudy.client}</p>
+    </div>
+    <p class="case-summary">{caseStudy.summary}</p>
+  </div>
+
+  <div class="case-outcome">
+    <p>{language === 'es' ? 'Resultado' : 'Outcome'}</p>
+    <strong>{caseStudy.outcomes[0]}</strong>
+  </div>
+
+  <footer class="case-footer">
+    <ul class="tag-list" aria-label={language === 'es' ? 'Tecnologías' : 'Technologies'}>
+      {caseStudy.technologies.slice(0, 5).map((technology) => <li>{technology}</li>)}
+      {caseStudy.technologies.length > 5 && (
+        <li aria-label={`${caseStudy.technologies.length - 5} more technologies`}>
+          +{caseStudy.technologies.length - 5}
+        </li>
+      )}
+    </ul>
+    <a class="text-link" href={href} aria-describedby={titleId}>{readLabel}</a>
+  </footer>
+</article>
+
+<style>
+  .case-card {
+    display: grid;
+    min-height: 31rem;
+    padding: clamp(1.35rem, 3vw, 2.5rem);
+    border: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-surface) 62%, transparent);
+    grid-template-rows: auto 1fr auto auto;
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .case-card:hover {
+    border-color: var(--color-line-strong);
+    background: var(--color-surface);
+    transform: translateY(-0.25rem);
+  }
+
+  .case-card--featured {
+    background: var(--color-surface);
+  }
+
+  .case-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.9rem;
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-line);
+    color: var(--color-ink-faint);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+  }
+
+  .case-meta span + span::before {
+    margin-inline-end: 0.9rem;
+    color: var(--color-line-strong);
+    content: '/';
+  }
+
+  .case-index {
+    color: var(--color-accent-strong);
+  }
+
+  .case-body {
+    display: grid;
+    gap: var(--space-5);
+    align-content: start;
+    padding-block: var(--space-6);
+  }
+
+  .case-mode,
+  .case-outcome > p {
+    color: var(--color-accent-strong);
+    font-size: 0.68rem;
+    font-weight: 780;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    max-width: 20ch;
+    margin-top: var(--space-3);
+    font-family: var(--font-serif);
+    font-size: var(--step-3);
+    font-weight: 510;
+    letter-spacing: -0.04em;
+  }
+
+  h3 a {
+    text-decoration: none;
+  }
+
+  h3 a:hover {
+    color: var(--color-accent-strong);
+  }
+
+  .case-client {
+    margin-top: var(--space-2);
+    color: var(--color-ink-faint);
+    font-size: var(--step--1);
+  }
+
+  .case-summary {
+    max-width: 54ch;
+    color: var(--color-ink-soft);
+  }
+
+  .case-outcome {
+    padding-block: var(--space-4);
+    border-block: 1px solid var(--color-line);
+  }
+
+  .case-outcome strong {
+    display: block;
+    margin-top: var(--space-2);
+    font-size: var(--step--1);
+    font-weight: 650;
+    line-height: 1.5;
+  }
+
+  .case-footer {
+    display: flex;
+    gap: var(--space-4);
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-top: var(--space-4);
+  }
+
+  .tag-list {
+    max-width: 70%;
+  }
+
+  .text-link {
+    flex: 0 0 auto;
+  }
+
+  @media (max-width: 32rem) {
+    .case-card {
+      min-height: auto;
+    }
+
+    .case-footer {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .tag-list {
+      max-width: 100%;
+    }
+  }
+</style>

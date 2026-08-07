@@ -1,0 +1,357 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import DualTrack from '@/components/DualTrack.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import { getContent } from '@/data';
+import type { Locale } from '@/domain';
+
+interface Props {
+  language: Locale;
+}
+
+const { language } = Astro.props;
+const content = await getContent(language);
+const page = content.pages.contact;
+const formEndpoint = import.meta.env.PUBLIC_CONTACT_FORM_ENDPOINT;
+const professionalSubject = language === 'es'
+  ? 'Oportunidad profesional desde yerkoacuna.dev'
+  : 'Professional opportunity from yerkoacuna.dev';
+const projectSubject = language === 'es'
+  ? 'Proyecto de software desde yerkoacuna.dev'
+  : 'Software project from yerkoacuna.dev';
+const copy = language === 'es'
+  ? {
+      professionalEyebrow: 'Para equipos de producto',
+      professionalTitle: 'Senior Full-Stack Engineer / Technical Lead',
+      professionalDescription:
+        'Para roles remotos, liderazgo técnico práctico, modernización y ownership transversal dentro de un equipo.',
+      professionalLink: 'Conversar sobre una oportunidad',
+      professionalDetails: ['Colaboración remota desde Chile', 'Zona horaria GMT-3', 'Inglés profesional'],
+      companyEyebrow: 'Para organizaciones',
+      companyTitle: 'Desarrollo de Software Yerko Acuña EIRL',
+      companyDescription:
+        'Para sistemas operacionales, plataformas internas, integraciones y desarrollos completos con un responsable técnico directo.',
+      companyLink: 'Conversar sobre un proyecto',
+      companyDetails: ['Discovery y alcance', 'Arquitectura e implementación', 'Despliegue y continuidad'],
+      direct: 'Contacto directo',
+      directTitle: 'El mejor primer mensaje explica el contexto, no la solución.',
+      directDescription:
+        'Cuéntame qué operación o producto está involucrado, qué limita hoy al equipo y qué resultado esperas. Con eso podemos evaluar rápidamente el siguiente paso.',
+      email: 'Correo',
+      github: 'GitHub',
+      cv: 'Currículum',
+      download: 'Descargar PDF',
+      formEyebrow: 'Formulario',
+      formTitle: 'Enviar contexto del proyecto',
+      name: 'Nombre',
+      emailField: 'Correo de contacto',
+      organization: 'Organización (opcional)',
+      topic: 'Tipo de conversación',
+      topicPlaceholder: 'Selecciona una opción',
+      opportunity: 'Oportunidad profesional',
+      project: 'Proyecto para Yerko Acuña EIRL',
+      advisory: 'Asesoría o revisión técnica',
+      message: 'Contexto y resultado buscado',
+      consent: 'Acepto que estos datos se usen únicamente para responder este mensaje.',
+      submit: 'Enviar mensaje',
+      privacy: 'No se usan estos datos para marketing ni listas de correo.',
+    }
+  : {
+      professionalEyebrow: 'For product teams',
+      professionalTitle: 'Senior Full-Stack Engineer / Technical Lead',
+      professionalDescription:
+        'For remote roles, hands-on technical leadership, modernization, and cross-stack ownership inside a product team.',
+      professionalLink: 'Discuss an opportunity',
+      professionalDetails: ['Remote collaboration from Chile', 'GMT-3 time zone', 'Professional English'],
+      companyEyebrow: 'For organizations',
+      companyTitle: 'Desarrollo de Software Yerko Acuña EIRL',
+      companyDescription:
+        'For operational systems, internal platforms, integrations, and complete builds with one accountable technical lead.',
+      companyLink: 'Discuss a project',
+      companyDetails: ['Discovery and scope', 'Architecture and implementation', 'Deployment and continuity'],
+      direct: 'Direct contact',
+      directTitle: 'The best first message explains the context, not the solution.',
+      directDescription:
+        'Tell me which operation or product is involved, what limits the team today, and what outcome you need. That is enough to evaluate a useful next step.',
+      email: 'Email',
+      github: 'GitHub',
+      cv: 'Résumé',
+      download: 'Download PDF',
+      formEyebrow: 'Contact form',
+      formTitle: 'Share the project context',
+      name: 'Name',
+      emailField: 'Contact email',
+      organization: 'Organization (optional)',
+      topic: 'Conversation type',
+      topicPlaceholder: 'Select an option',
+      opportunity: 'Professional opportunity',
+      project: 'Project for Yerko Acuña EIRL',
+      advisory: 'Technical advisory or review',
+      message: 'Context and desired outcome',
+      consent: 'I agree that this information may be used only to respond to this message.',
+      submit: 'Send message',
+      privacy: 'This information is not used for marketing or mailing lists.',
+    };
+const professionalMailto = `mailto:${content.settings.contactEmail}?subject=${encodeURIComponent(professionalSubject)}`;
+const projectMailto = `mailto:${content.company.contactEmail}?subject=${encodeURIComponent(projectSubject)}`;
+---
+
+<BaseLayout title={page.title} description={page.description} language={language} ogImage="/og.png">
+  <section class="page-hero shell">
+    <SectionHeading
+      eyebrow={page.eyebrow}
+      title={page.title}
+      description={page.description}
+      as="h1"
+      size="hero"
+    />
+  </section>
+
+  <section class="shell collaboration-paths">
+    <DualTrack
+      ariaLabel={language === 'es' ? 'Formas de colaboración' : 'Ways to work together'}
+      tracks={[
+        {
+          eyebrow: copy.professionalEyebrow,
+          title: copy.professionalTitle,
+          description: copy.professionalDescription,
+          href: professionalMailto,
+          linkLabel: copy.professionalLink,
+          details: copy.professionalDetails,
+        },
+        {
+          eyebrow: copy.companyEyebrow,
+          title: copy.companyTitle,
+          description: copy.companyDescription,
+          href: projectMailto,
+          linkLabel: copy.companyLink,
+          details: copy.companyDetails,
+        },
+      ]}
+    />
+  </section>
+
+  <section class="direct-contact section section--ruled">
+    <div class="shell direct-grid">
+      <div>
+        <p class="eyebrow">{copy.direct}</p>
+        <h2>{copy.directTitle}</h2>
+        <p>{copy.directDescription}</p>
+      </div>
+      <dl>
+        <div>
+          <dt>{copy.email}</dt>
+          <dd><a href={`mailto:${content.settings.contactEmail}`}>{content.settings.contactEmail}</a></dd>
+        </div>
+        <div>
+          <dt>{copy.github}</dt>
+          <dd><a href={content.settings.githubUrl} target="_blank" rel="me noreferrer">RainBoard01 ↗</a></dd>
+        </div>
+        <div>
+          <dt>{copy.cv}</dt>
+          <dd><a href={content.settings.cvPath} download>{copy.download}</a></dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  {formEndpoint && (
+    <section class="form-section section section--ruled surface">
+      <div class="shell form-grid">
+        <div>
+          <p class="eyebrow">{copy.formEyebrow}</p>
+          <h2>{copy.formTitle}</h2>
+        </div>
+        <form action={formEndpoint} method="post">
+          <input type="hidden" name="language" value={language} />
+          <div class="form-row">
+            <label>
+              <span>{copy.name}</span>
+              <input name="name" type="text" autocomplete="name" required />
+            </label>
+            <label>
+              <span>{copy.emailField}</span>
+              <input name="email" type="email" autocomplete="email" required />
+            </label>
+          </div>
+          <label>
+            <span>{copy.organization}</span>
+            <input name="organization" type="text" autocomplete="organization" />
+          </label>
+          <label>
+            <span>{copy.topic}</span>
+            <select name="topic" required>
+              <option value="" selected disabled>{copy.topicPlaceholder}</option>
+              <option value="professional-opportunity">{copy.opportunity}</option>
+              <option value="software-project">{copy.project}</option>
+              <option value="technical-advisory">{copy.advisory}</option>
+            </select>
+          </label>
+          <label>
+            <span>{copy.message}</span>
+            <textarea name="message" rows="7" required></textarea>
+          </label>
+          <label class="honeypot" aria-hidden="true">
+            <span>Website</span>
+            <input name="website" type="text" tabindex="-1" autocomplete="off" />
+          </label>
+          <label class="consent">
+            <input name="consent" type="checkbox" required />
+            <span>{copy.consent}</span>
+          </label>
+          <div class="form-footer">
+            <button class="button" type="submit">{copy.submit}</button>
+            <p>{copy.privacy}</p>
+          </div>
+        </form>
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-block: var(--space-9) var(--space-8);
+  }
+
+  .collaboration-paths {
+    padding-bottom: var(--space-9);
+  }
+
+  .direct-grid,
+  .form-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(18rem, 0.9fr);
+    gap: clamp(3rem, 9vw, 9rem);
+  }
+
+  .direct-grid h2,
+  .form-grid h2 {
+    max-width: 16ch;
+    margin-top: var(--space-4);
+    font-size: var(--step-3);
+  }
+
+  .direct-grid h2 + p {
+    max-width: var(--measure);
+    margin-top: var(--space-5);
+    color: var(--color-ink-soft);
+  }
+
+  .direct-grid dl {
+    border-top: 1px solid var(--color-line-strong);
+  }
+
+  .direct-grid dl div {
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .direct-grid dt {
+    color: var(--color-ink-faint);
+    font-size: 0.68rem;
+    font-weight: 780;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .direct-grid dd {
+    overflow-wrap: anywhere;
+    font-weight: 680;
+  }
+
+  form {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  form label:not(.consent, .honeypot) {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  form label > span {
+    font-size: var(--step--1);
+    font-weight: 720;
+  }
+
+  :is(input, select, textarea) {
+    width: 100%;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-canvas);
+  }
+
+  :is(input, select) {
+    min-height: 3rem;
+    padding-inline: 0.8rem;
+  }
+
+  textarea {
+    resize: vertical;
+    padding: 0.8rem;
+  }
+
+  .consent {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-3);
+    align-items: start;
+  }
+
+  .consent input {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: 0.2rem;
+  }
+
+  .honeypot {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .form-footer {
+    display: flex;
+    gap: var(--space-4);
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .form-footer p {
+    max-width: 38ch;
+    color: var(--color-ink-faint);
+    font-size: 0.72rem;
+  }
+
+  @media (max-width: 52rem) {
+    .direct-grid,
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 36rem) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .form-footer {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+</style>

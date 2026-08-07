@@ -1,0 +1,45 @@
+name: Verify
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create env file
+        env:
+          PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+          PUBLIC_CONTACT_EMAIL: ${{ vars.PUBLIC_CONTACT_EMAIL }}
+          PUBLIC_GITHUB_URL: ${{ vars.PUBLIC_GITHUB_URL }}
+          PUBLIC_LINKEDIN_URL: ${{ vars.PUBLIC_LINKEDIN_URL }}
+          PUBLIC_CONTACT_FORM_ENDPOINT: ${{ vars.PUBLIC_CONTACT_FORM_ENDPOINT }}
+          CONTENT_SOURCE: ${{ vars.CONTENT_SOURCE }}
+          CONTENT_FALLBACK: ${{ vars.CONTENT_FALLBACK }}
+        run: |
+          cat > .env <<EOF
+          PUBLIC_SITE_URL=${PUBLIC_SITE_URL:-https://yerkoacuna.dev}
+          PUBLIC_CONTACT_EMAIL=${PUBLIC_CONTACT_EMAIL:-contact@yerkoacuna.dev}
+          PUBLIC_GITHUB_URL=${PUBLIC_GITHUB_URL:-https://github.com/RainBoard01}
+          PUBLIC_LINKEDIN_URL=${PUBLIC_LINKEDIN_URL:-}
+          PUBLIC_CONTACT_FORM_ENDPOINT=${PUBLIC_CONTACT_FORM_ENDPOINT:-}
+          CONTENT_SOURCE=${CONTENT_SOURCE:-local}
+          CONTENT_FALLBACK=${CONTENT_FALLBACK:-fail}
+          CAPROVER_GIT_COMMIT_SHA=${GITHUB_SHA}
+          EOF
+
+      - name: Verify (types, tests, build, links)
+        run: npm run verify

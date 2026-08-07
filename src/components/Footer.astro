@@ -1,0 +1,234 @@
+---
+import { navigationFor, type NavigationItem, type SiteLanguage } from './navigation';
+
+interface SocialLink {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  language?: SiteLanguage;
+  items?: NavigationItem[];
+  email?: string;
+  socialLinks?: SocialLink[];
+}
+
+const {
+  language = 'en',
+  items = navigationFor(language),
+  email = import.meta.env.PUBLIC_CONTACT_EMAIL || 'contact@yerkoacuna.dev',
+  socialLinks,
+} = Astro.props;
+
+const configuredSocials: SocialLink[] = socialLinks ?? [
+  {
+    label: 'GitHub',
+    href: import.meta.env.PUBLIC_GITHUB_URL || 'https://github.com/RainBoard01',
+  },
+  ...(import.meta.env.PUBLIC_LINKEDIN_URL
+    ? [{ label: 'LinkedIn', href: import.meta.env.PUBLIC_LINKEDIN_URL }]
+    : []),
+];
+
+const copy = language === 'es'
+  ? {
+      statement: 'Una práctica técnica. Dos formas de trabajar juntos.',
+      description:
+        'Liderazgo e ingeniería full-stack para equipos de producto, y desarrollo de software de punta a punta mediante Yerko Acuña EIRL.',
+      navigation: 'Explorar',
+      connect: 'Contacto',
+      emailLabel: 'Escribir por correo',
+      cv: 'Descargar CV',
+      company: 'Desarrollo de Software Yerko Acuña EIRL',
+      rights: 'Todos los derechos reservados.',
+    }
+  : {
+      statement: 'One technical practice. Two ways to work together.',
+      description:
+        'Full-stack engineering and technical leadership for product teams, plus end-to-end software delivery through Yerko Acuña EIRL.',
+      navigation: 'Explore',
+      connect: 'Connect',
+      emailLabel: 'Send an email',
+      cv: 'Download résumé',
+      company: 'Desarrollo de Software Yerko Acuña EIRL',
+      rights: 'All rights reserved.',
+    };
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="shell footer-grid">
+    <div class="footer-intro">
+      <p class="footer-kicker">Yerko Acuña</p>
+      <p class="footer-statement">{copy.statement}</p>
+      <p class="footer-description">{copy.description}</p>
+    </div>
+
+    <nav aria-labelledby="footer-navigation-heading">
+      <h2 id="footer-navigation-heading">{copy.navigation}</h2>
+      <ul>
+        {items.map((item) => (
+          <li><a href={item.href}>{item.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="footer-connect">
+      <h2>{copy.connect}</h2>
+      <a class="footer-email" href={`mailto:${email}`}>
+        <span>{copy.emailLabel}</span>
+        <strong>{email}</strong>
+      </a>
+      <ul class="social-list">
+        {configuredSocials.map((link) => (
+          <li>
+            <a href={link.href} target="_blank" rel="me noreferrer">{link.label}</a>
+          </li>
+        ))}
+        <li><a href="/cv.pdf" download>{copy.cv}</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="shell footer-legal">
+    <p>{copy.company}</p>
+    <p>© {currentYear} Yerko Acuña. {copy.rights}</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    padding-block: var(--space-8) var(--space-4);
+    border-top: 1px solid var(--color-line);
+    background: var(--color-ink);
+    color: #e9e7df;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: minmax(17rem, 1.5fr) minmax(10rem, 0.55fr) minmax(16rem, 1fr);
+    gap: clamp(2.5rem, 7vw, 7rem);
+    padding-bottom: var(--space-8);
+  }
+
+  .footer-kicker,
+  .site-footer h2 {
+    color: #9fb8aa;
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    font-weight: 760;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .footer-statement {
+    max-width: 17ch;
+    margin-top: var(--space-5);
+    color: #f5f1e8;
+    font-family: var(--font-serif);
+    font-size: var(--step-3);
+    font-weight: 480;
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+  }
+
+  .footer-description {
+    max-width: 54ch;
+    margin-top: var(--space-4);
+    color: #aeb5af;
+    font-size: var(--step--1);
+  }
+
+  .site-footer ul {
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-footer nav ul {
+    display: grid;
+    gap: 0.55rem;
+    margin-top: var(--space-5);
+  }
+
+  .site-footer a {
+    color: inherit;
+    text-decoration-color: #627369;
+  }
+
+  .site-footer a:hover {
+    color: #fff;
+  }
+
+  .site-footer nav a {
+    font-size: 0.88rem;
+    text-decoration: none;
+  }
+
+  .footer-email {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--space-5);
+    text-decoration: none;
+  }
+
+  .footer-email span {
+    color: #aeb5af;
+    font-size: 0.7rem;
+  }
+
+  .footer-email strong {
+    overflow-wrap: anywhere;
+    font-family: var(--font-serif);
+    font-size: var(--step-1);
+    font-weight: 480;
+  }
+
+  .social-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem 1rem;
+    margin-top: var(--space-5);
+  }
+
+  .social-list a {
+    font-size: 0.75rem;
+    font-weight: 720;
+  }
+
+  .footer-legal {
+    display: flex;
+    gap: var(--space-4);
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--space-4);
+    border-top: 1px solid #3c4741;
+    color: #8f9992;
+    font-size: 0.66rem;
+  }
+
+  @media (max-width: 62rem) {
+    .footer-grid {
+      grid-template-columns: 1.5fr 1fr;
+    }
+
+    .footer-intro {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 38rem) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .footer-intro {
+      grid-column: auto;
+    }
+
+    .footer-legal {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

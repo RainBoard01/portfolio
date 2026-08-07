@@ -1,0 +1,131 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CaseCard from '@/components/CaseCard.astro';
+import CTA from '@/components/CTA.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import { getContent } from '@/data';
+import type { Locale } from '@/domain';
+import { caseStudyPath, routePath, type CaseStudyId } from '@/i18n';
+
+interface Props {
+  language: Locale;
+}
+
+const { language } = Astro.props;
+const content = await getContent(language);
+const page = content.pages.work;
+const orderedCases = [...content.caseStudies].sort((a, b) => a.sortOrder - b.sortOrder);
+const copy = language === 'es'
+  ? {
+      proof: 'Evidencia de trabajo',
+      proofTitle: 'No son demos: son sistemas construidos alrededor de operaciones reales.',
+      proofDescription:
+        'Parte del trabajo está disponible públicamente; otros casos se describen sin exponer información privada del cliente. En todos, el foco está en el problema, la responsabilidad y las decisiones.',
+      ctaEyebrow: '¿Un problema similar?',
+      ctaTitle: 'Conversemos sobre el sistema que tu operación necesita.',
+      ctaDescription:
+        'Comparte el contexto, las restricciones actuales y el resultado que buscas. Podemos definir si conviene una asesoría, una modernización o un desarrollo completo.',
+      ctaPrimary: 'Conversar sobre un proyecto',
+      ctaSecondary: 'Ver servicios',
+    }
+  : {
+      proof: 'Evidence of delivery',
+      proofTitle: 'These are not demos. They are systems shaped around real operations.',
+      proofDescription:
+        'Some work is publicly available; other cases are described without exposing private client information. Each one focuses on the problem, ownership, decisions, and result.',
+      ctaEyebrow: 'A similar problem?',
+      ctaTitle: 'Let’s discuss the system your operation needs.',
+      ctaDescription:
+        'Share the context, current constraints, and outcome you need. We can determine whether the right path is advisory work, modernization, or a complete build.',
+      ctaPrimary: 'Discuss a project',
+      ctaSecondary: 'Explore services',
+    };
+---
+
+<BaseLayout
+  title={page.title}
+  description={page.description}
+  language={language}
+  ogImage="/og.png"
+>
+  <section class="page-hero shell">
+    <SectionHeading
+      eyebrow={page.eyebrow}
+      title={page.title}
+      description={page.description}
+      as="h1"
+      size="hero"
+    />
+  </section>
+
+  <section class="work-grid shell" aria-label={page.eyebrow}>
+    {orderedCases.map((caseStudy, index) => (
+      <CaseCard
+        caseStudy={caseStudy}
+        href={caseStudyPath(caseStudy.id as CaseStudyId, language)}
+        language={language}
+        readLabel={content.labels.readCaseStudy}
+        index={index}
+      />
+    ))}
+  </section>
+
+  <section class="proof section section--ruled">
+    <div class="shell proof-grid">
+      <p class="eyebrow">{copy.proof}</p>
+      <div>
+        <h2>{copy.proofTitle}</h2>
+        <p>{copy.proofDescription}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section shell">
+    <CTA
+      eyebrow={copy.ctaEyebrow}
+      title={copy.ctaTitle}
+      description={copy.ctaDescription}
+      primary={{ label: copy.ctaPrimary, href: routePath('contact', language) }}
+      secondary={{ label: copy.ctaSecondary, href: routePath('services', language) }}
+    />
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-block: var(--space-9) var(--space-8);
+  }
+
+  .work-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .work-grid > :global(*) {
+    margin: -1px 0 0 -1px;
+  }
+
+  .proof-grid {
+    display: grid;
+    grid-template-columns: minmax(10rem, 0.45fr) minmax(0, 1.55fr);
+    gap: clamp(2rem, 8vw, 8rem);
+  }
+
+  .proof h2 {
+    max-width: 17ch;
+    font-size: var(--step-3);
+  }
+
+  .proof h2 + p {
+    max-width: var(--measure);
+    margin-top: var(--space-5);
+    color: var(--color-ink-soft);
+  }
+
+  @media (max-width: 52rem) {
+    .work-grid,
+    .proof-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

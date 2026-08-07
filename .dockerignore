@@ -1,0 +1,15 @@
+.git
+.github
+.DS_Store
+.astro
+.env
+.env.*
+node_modules
+dist
+coverage
+npm-debug.log*
+work
+outputs
+docs/plans
+tests
+README.md

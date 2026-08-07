@@ -1,0 +1,162 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CTA from '@/components/CTA.astro';
+import EditorialBlocks from '@/views/EditorialBlocks.astro';
+import { getContent } from '@/data';
+import type { Locale } from '@/domain';
+import {
+  alternateLocale,
+  blogPostPath,
+  routePath,
+  type BlogPostId,
+} from '@/i18n';
+
+interface Props {
+  language: Locale;
+  postId: BlogPostId;
+}
+
+const { language, postId } = Astro.props;
+const content = await getContent(language);
+const post = content.blogPosts.find((item) => item.id === postId);
+
+if (!post) {
+  throw new Error(`Blog post "${postId}" is missing from the ${language} content snapshot.`);
+}
+
+const otherLanguage = alternateLocale(language);
+const formattedDate = new Intl.DateTimeFormat(language === 'es' ? 'es-CL' : 'en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+}).format(new Date(`${post.publishedAt}T00:00:00Z`));
+const copy = language === 'es'
+  ? {
+      back: 'Volver al blog',
+      byline: 'Escrito por Yerko Acuña',
+      ctaEyebrow: 'Aplicar la idea',
+      ctaTitle: 'El ownership empieza con una conversación clara.',
+      ctaDescription:
+        'Si estás evaluando una arquitectura, una modernización o un producto operacional, conversemos sobre el contexto antes de elegir la solución.',
+      ctaPrimary: 'Escribir a Yerko',
+      ctaSecondary: 'Ver trabajo',
+    }
+  : {
+      back: 'Back to blog',
+      byline: 'Written by Yerko Acuña',
+      ctaEyebrow: 'Put the idea to work',
+      ctaTitle: 'Ownership starts with a clear conversation.',
+      ctaDescription:
+        'If you are evaluating an architecture, modernization effort, or operational product, let’s discuss the context before choosing the solution.',
+      ctaPrimary: 'Email Yerko',
+      ctaSecondary: 'View work',
+    };
+const articleUrl = new URL(blogPostPath(postId, language), Astro.site || 'https://yerkoacuna.dev').href;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.title,
+  description: post.excerpt,
+  datePublished: post.publishedAt,
+  inLanguage: language,
+  url: articleUrl,
+  author: { '@id': 'https://yerkoacuna.dev/#person' },
+  publisher: { '@id': 'https://yerkoacuna.dev/#person' },
+  mainEntityOfPage: articleUrl,
+};
+---
+
+<BaseLayout
+  title={post.title}
+  description={post.excerpt}
+  language={language}
+  alternateHref={blogPostPath(postId, otherLanguage)}
+  ogImage="/og.png"
+  ogType="article"
+  publishedTime={post.publishedAt}
+  jsonLd={jsonLd}
+>
+  <article>
+    <header class="article-hero shell--narrow">
+      <a class="back-link" href={routePath('blog', language)}>← {copy.back}</a>
+      <p class="eyebrow">{content.pages.blog.eyebrow}</p>
+      <h1>{post.title}</h1>
+      <p class="excerpt">{post.excerpt}</p>
+      <div class="article-meta">
+        <span>{copy.byline}</span>
+        <time datetime={post.publishedAt}>{formattedDate}</time>
+        <span>{post.readingMinutes} {content.labels.minuteRead}</span>
+      </div>
+      <ul class="tag-list" aria-label={content.labels.topics}>
+        {post.topics.map((topic) => <li>{topic}</li>)}
+      </ul>
+    </header>
+
+    <section class="article-content section section--ruled">
+      <div class="shell--narrow">
+        <EditorialBlocks blocks={post.body} />
+      </div>
+    </section>
+  </article>
+
+  <section class="section shell">
+    <CTA
+      eyebrow={copy.ctaEyebrow}
+      title={copy.ctaTitle}
+      description={copy.ctaDescription}
+      primary={{
+        label: copy.ctaPrimary,
+        href: `mailto:${content.settings.contactEmail}?subject=${encodeURIComponent(post.title)}`,
+      }}
+      secondary={{ label: copy.ctaSecondary, href: routePath('work', language) }}
+      tone="mineral"
+    />
+  </section>
+</BaseLayout>
+
+<style>
+  .article-hero {
+    padding-block: var(--space-6) var(--space-9);
+  }
+
+  .back-link {
+    display: inline-flex;
+    margin-bottom: var(--space-8);
+    color: var(--color-ink-soft);
+    font-size: var(--step--1);
+    font-weight: 700;
+  }
+
+  .article-hero h1 {
+    max-width: 13ch;
+    margin-top: var(--space-4);
+    font-size: var(--step-5);
+  }
+
+  .excerpt {
+    max-width: 58ch;
+    margin-top: var(--space-5);
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+  }
+
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-5);
+    margin-top: var(--space-6);
+    padding-block: var(--space-4);
+    border-block: 1px solid var(--color-line);
+    color: var(--color-ink-faint);
+    font-size: var(--step--1);
+  }
+
+  .article-hero .tag-list {
+    margin-top: var(--space-4);
+  }
+
+  .article-content {
+    background: color-mix(in srgb, var(--color-surface) 55%, transparent);
+  }
+</style>

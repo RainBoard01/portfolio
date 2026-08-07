@@ -1,0 +1,349 @@
+---
+import type { Locale } from '@/domain';
+import { getContent } from '@/data';
+import { caseStudyPath, routePath, type CaseStudyId } from '@/i18n/routes';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CTA from '@/components/CTA.astro';
+import ExperienceTimeline from '@/components/ExperienceTimeline.astro';
+import MetricStrip from '@/components/MetricStrip.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+
+interface Props {
+  language: Locale;
+}
+
+const { language } = Astro.props;
+const content = await getContent(language);
+const { settings, labels, pages, profile, experiences, caseStudies } = content;
+const professionalCases = caseStudies.filter((item) => item.collaborationMode !== 'academic');
+const relatedCases = Object.fromEntries(
+  caseStudies.map((item) => [
+    item.id,
+    {
+      href: caseStudyPath(item.id as CaseStudyId, language),
+      label: item.title,
+    },
+  ]),
+);
+
+const copy = language === 'es'
+  ? {
+      heroSummary:
+        'Mi trayectoria combina implementación hands-on, coordinación de proyectos y liderazgo técnico. El alcance cambia según el equipo; la responsabilidad sobre el resultado permanece.',
+      downloadCv: labels.downloadCv,
+      viewWork: labels.viewAllWork,
+      metricSince: 'Experiencia profesional',
+      metricSinceDetail: 'Entrega continua en sistemas empresariales desde 2022.',
+      metricCases: 'Casos profesionales',
+      metricCasesDetail: 'Trabajo documentado sin publicar datos confidenciales.',
+      metricDomains: 'Dominios especializados',
+      metricDomainsDetail: 'Desde laboratorios hasta operaciones pesqueras.',
+      metricTracks: 'Frentes de trabajo',
+      metricTracksDetail: 'Equipo de producto y empresa de software propia.',
+      timelineEyebrow: 'Trayectoria',
+      timelineTitle: 'Responsabilidad creciente a través de todo el ciclo de entrega.',
+      timelineDescription:
+        'Las experiencias conectan requerimientos, arquitectura, implementación, despliegue y continuidad en producción.',
+      capabilitiesEyebrow: 'Capacidades',
+      capabilitiesTitle: 'Un perfil capaz de cruzar los límites del sistema.',
+      capabilitiesDescription:
+        'No se trata de usar cada herramienta a la vez, sino de reconocer dónde pertenece cada decisión y mantener coherencia entre capas.',
+      focusLabel: 'Áreas de foco',
+      ctaEyebrow: 'Ver la evidencia',
+      ctaTitle: 'Cada rol se entiende mejor a través de los sistemas entregados.',
+      ctaDescription:
+        'Los casos de estudio describen contexto, responsabilidades, enfoque y resultados con el nivel de detalle que permite cada proyecto.',
+    }
+  : {
+      heroSummary:
+        'My experience combines hands-on implementation, project coordination, and technical leadership. The scope changes with the team; responsibility for the outcome remains.',
+      downloadCv: labels.downloadCv,
+      viewWork: labels.viewAllWork,
+      metricSince: 'Professional experience',
+      metricSinceDetail: 'Continuous enterprise-system delivery since 2022.',
+      metricCases: 'Professional cases',
+      metricCasesDetail: 'Documented work without publishing confidential details.',
+      metricDomains: 'Specialized domains',
+      metricDomainsDetail: 'From laboratories to fishing operations.',
+      metricTracks: 'Work tracks',
+      metricTracksDetail: 'Product team and independently owned software company.',
+      timelineEyebrow: 'Timeline',
+      timelineTitle: 'Growing responsibility across the full delivery cycle.',
+      timelineDescription:
+        'These experiences connect requirements, architecture, implementation, deployment, and continuity in production.',
+      capabilitiesEyebrow: 'Capabilities',
+      capabilitiesTitle: 'A profile built to cross system boundaries.',
+      capabilitiesDescription:
+        'The goal is not to use every tool at once, but to recognize where each decision belongs and maintain coherence between layers.',
+      focusLabel: 'Focus areas',
+      ctaEyebrow: 'See the evidence',
+      ctaTitle: 'Each role is clearer through the systems it helped deliver.',
+      ctaDescription:
+        'Case studies describe context, responsibility, approach, and outcomes at the level of detail each engagement permits.',
+    };
+
+const metrics = [
+  { value: '2022—', label: copy.metricSince, detail: copy.metricSinceDetail },
+  { value: professionalCases.length, label: copy.metricCases, detail: copy.metricCasesDetail },
+  { value: profile.domains.length, label: copy.metricDomains, detail: copy.metricDomainsDetail },
+  { value: experiences.length, label: copy.metricTracks, detail: copy.metricTracksDetail },
+];
+---
+
+<BaseLayout
+  title={settings.navigation.experience}
+  description={pages.experience.description}
+  language={language}
+  ogImage="/og.png"
+>
+  <section class="page-hero shell" aria-labelledby="experience-title">
+    <div>
+      <p class="eyebrow">{pages.experience.eyebrow}</p>
+      <h1 id="experience-title">{pages.experience.title}</h1>
+      <p class="page-description">{pages.experience.description}</p>
+    </div>
+    <aside>
+      <p>{copy.heroSummary}</p>
+      <div class="button-row">
+        <a class="button" href={settings.cvPath} download>{copy.downloadCv}</a>
+        <a class="button button--secondary" href={routePath('work', language)}>{copy.viewWork}</a>
+      </div>
+    </aside>
+  </section>
+
+  <div class="shell metric-wrap">
+    <MetricStrip items={metrics} />
+  </div>
+
+  <section class="section">
+    <div class="shell section-stack">
+      <SectionHeading
+        eyebrow={copy.timelineEyebrow}
+        title={copy.timelineTitle}
+        description={copy.timelineDescription}
+      />
+      <ExperienceTimeline
+        items={experiences}
+        language={language}
+        relatedCases={relatedCases}
+      />
+    </div>
+  </section>
+
+  <section class="section capabilities-section section--ruled">
+    <div class="shell capabilities-layout">
+      <div class="capabilities-intro">
+        <SectionHeading
+          eyebrow={copy.capabilitiesEyebrow}
+          title={copy.capabilitiesTitle}
+          description={copy.capabilitiesDescription}
+          size="compact"
+        />
+        <div class="focus-block">
+          <h3>{copy.focusLabel}</h3>
+          <ul>
+            {profile.focusAreas.map((area) => <li>{area}</li>)}
+          </ul>
+        </div>
+      </div>
+
+      <div class="capability-list">
+        {profile.expertise.map((group, index) => (
+          <article>
+            <header>
+              <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+              <h3>{group.title}</h3>
+            </header>
+            <ul>
+              {group.items.map((item) => <li>{item}</li>)}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section shell">
+    <CTA
+      eyebrow={copy.ctaEyebrow}
+      title={copy.ctaTitle}
+      description={copy.ctaDescription}
+      primary={{ label: labels.viewAllWork, href: routePath('work', language) }}
+      secondary={{ label: labels.sendEmail, href: `mailto:${settings.contactEmail}` }}
+    />
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    display: grid;
+    min-height: 40rem;
+    grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
+    gap: clamp(3rem, 10vw, 10rem);
+    align-items: end;
+    padding-block: var(--space-9) var(--space-7);
+  }
+
+  .page-hero h1 {
+    max-width: 14ch;
+    margin-top: var(--space-5);
+  }
+
+  .page-description {
+    max-width: var(--measure);
+    margin-top: var(--space-5);
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+  }
+
+  .page-hero aside {
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-line-strong);
+  }
+
+  .page-hero aside > p {
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+  }
+
+  .page-hero aside .button-row {
+    margin-top: var(--space-5);
+  }
+
+  .metric-wrap {
+    padding-top: var(--space-4);
+  }
+
+  .section-stack {
+    display: grid;
+    gap: var(--space-7);
+  }
+
+  .capabilities-section {
+    background: var(--color-canvas-deep);
+  }
+
+  .capabilities-layout {
+    display: grid;
+    grid-template-columns: minmax(17rem, 0.75fr) minmax(0, 1.25fr);
+    gap: clamp(3rem, 9vw, 9rem);
+  }
+
+  .capabilities-intro {
+    align-self: start;
+  }
+
+  .focus-block {
+    margin-top: var(--space-7);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-line-strong);
+  }
+
+  .focus-block h3 {
+    color: var(--color-accent-strong);
+    font-size: 0.68rem;
+    font-weight: 780;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .focus-block ul {
+    display: grid;
+    gap: 0.65rem;
+    margin-top: var(--space-4);
+    padding: 0;
+    list-style: none;
+  }
+
+  .focus-block li {
+    position: relative;
+    padding-inline-start: 1rem;
+    color: var(--color-ink-soft);
+    font-size: var(--step--1);
+  }
+
+  .focus-block li::before {
+    position: absolute;
+    top: 0.72em;
+    left: 0;
+    width: 0.28rem;
+    height: 0.28rem;
+    border-radius: 50%;
+    background: var(--color-accent);
+    content: '';
+  }
+
+  .capability-list {
+    border-top: 1px solid var(--color-line-strong);
+  }
+
+  .capability-list article {
+    display: grid;
+    grid-template-columns: minmax(12rem, 0.7fr) minmax(0, 1.3fr);
+    gap: var(--space-5);
+    padding-block: var(--space-5);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .capability-list header {
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    gap: var(--space-2);
+    align-items: baseline;
+  }
+
+  .capability-list header span {
+    color: var(--color-accent);
+    font-size: 0.68rem;
+    font-weight: 780;
+  }
+
+  .capability-list h3 {
+    font-size: var(--step-1);
+  }
+
+  .capability-list ul {
+    display: grid;
+    gap: 0.45rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .capability-list li {
+    color: var(--color-ink-soft);
+    font-size: var(--step--1);
+  }
+
+  @media (max-width: 62rem) {
+    .page-hero {
+      gap: var(--space-7);
+    }
+
+    .capabilities-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .capabilities-intro {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+    }
+
+    .focus-block {
+      margin-top: 0;
+    }
+  }
+
+  @media (max-width: 48rem) {
+    .page-hero {
+      min-height: auto;
+      grid-template-columns: 1fr;
+      padding-block: var(--space-8);
+    }
+
+    .capabilities-intro,
+    .capability-list article {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

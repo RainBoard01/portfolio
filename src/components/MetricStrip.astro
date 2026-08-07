@@ -1,0 +1,100 @@
+---
+export interface MetricItem {
+  value: string | number;
+  label: string;
+  detail?: string;
+}
+
+interface Props {
+  items: MetricItem[];
+  ariaLabel?: string;
+}
+
+const { items, ariaLabel = 'Selected professional facts' } = Astro.props;
+---
+
+<div class="metric-strip" aria-label={ariaLabel}>
+  <dl>
+    {items.map((item) => (
+      <div class="metric">
+        <dd>{item.value}</dd>
+        <dt>{item.label}</dt>
+        {item.detail && <p>{item.detail}</p>}
+      </div>
+    ))}
+  </dl>
+</div>
+
+<style>
+  .metric-strip {
+    border-block: 1px solid var(--color-line-strong);
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  }
+
+  .metric {
+    min-height: 11rem;
+    padding: var(--space-5);
+  }
+
+  .metric + .metric {
+    border-inline-start: 1px solid var(--color-line);
+  }
+
+  dd {
+    color: var(--color-accent-strong);
+    font-family: var(--font-serif);
+    font-size: var(--step-3);
+    font-weight: 510;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  dt {
+    margin-top: var(--space-3);
+    color: var(--color-ink);
+    font-size: var(--step--1);
+    font-weight: 760;
+    line-height: 1.35;
+  }
+
+  p {
+    margin-top: var(--space-2);
+    color: var(--color-ink-faint);
+    font-size: 0.72rem;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 52rem) {
+    dl {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .metric:nth-child(odd) {
+      border-inline-start: 0;
+    }
+
+    .metric:nth-child(n + 3) {
+      border-block-start: 1px solid var(--color-line);
+    }
+  }
+
+  @media (max-width: 31rem) {
+    dl {
+      grid-template-columns: 1fr;
+    }
+
+    .metric {
+      min-height: auto;
+    }
+
+    .metric + .metric,
+    .metric:nth-child(n + 3) {
+      border-block-start: 1px solid var(--color-line);
+      border-inline-start: 0;
+    }
+  }
+</style>

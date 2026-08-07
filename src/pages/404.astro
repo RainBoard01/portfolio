@@ -1,0 +1,52 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Page not found · Página no encontrada"
+  description="The requested page does not exist. La página solicitada no existe."
+  noindex
+  ogImage="/og.png"
+>
+  <section class="not-found shell">
+    <p class="eyebrow">404 · Route not found</p>
+    <h1>This route isn’t here.<br /><span>Esta ruta no está aquí.</span></h1>
+    <div class="not-found-copy">
+      <p>The address may have changed, or the link may be incomplete.</p>
+      <p>La dirección pudo cambiar o el enlace puede estar incompleto.</p>
+    </div>
+    <div class="button-row">
+      <a class="button" href="/">Go to the English home</a>
+      <a class="button button--secondary" href="/es/">Ir al inicio en español</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found {
+    display: grid;
+    min-height: 68vh;
+    align-content: center;
+    padding-block: var(--space-9);
+  }
+
+  h1 {
+    max-width: 15ch;
+    margin-top: var(--space-5);
+  }
+
+  h1 span {
+    color: var(--color-accent-strong);
+  }
+
+  .not-found-copy {
+    max-width: 48rem;
+    margin-top: var(--space-6);
+    color: var(--color-ink-soft);
+    font-size: var(--step-1);
+  }
+
+  .button-row {
+    margin-top: var(--space-7);
+  }
+</style>
