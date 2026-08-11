@@ -1,0 +1,48 @@
+# CapRover / local production config for https://static-web-server.net/
+# Astro builds with trailingSlash: "never" and directory HTML (…/index.html).
+
+[general]
+host = "::"
+port = 80
+root = "/home/sws/public"
+log-level = "error"
+
+cache-control-headers = true
+compression = true
+compression-level = "default"
+compression-static = false
+
+page404 = "./404.html"
+index-files = "index.html"
+redirect-trailing-slash = false
+directory-listing = false
+health = true
+
+[advanced]
+
+# CapRover terminates TLS; enable browser security headers on HTTP origin.
+[[advanced.headers]]
+source = "**/*"
+[advanced.headers.headers]
+X-Content-Type-Options = "nosniff"
+X-Frame-Options = "DENY"
+Referrer-Policy = "strict-origin-when-cross-origin"
+Permissions-Policy = "camera=(), geolocation=(), microphone=(), payment=(), usb=()"
+Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https: mailto:; img-src 'self' data: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' https:; media-src 'self' https:; manifest-src 'self'"
+
+# HTML entry points must revalidate; fingerprinted /_astro assets can be immutable.
+[[advanced.headers]]
+source = "**/*.html"
+headers = { Cache-Control = "no-cache" }
+
+[[advanced.headers]]
+source = "/_astro/**"
+headers = { Cache-Control = "public, max-age=31536000, immutable" }
+
+[[advanced.headers]]
+source = "**/*.{avif,gif,ico,jpg,jpeg,png,svg,webp,woff,woff2}"
+headers = { Cache-Control = "public, max-age=604800, must-revalidate" }
+
+[[advanced.headers]]
+source = "**/*.{pdf,txt,xml,webmanifest}"
+headers = { Cache-Control = "public, max-age=3600, must-revalidate" }

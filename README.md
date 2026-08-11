@@ -15,8 +15,8 @@ La primera versión obtiene todo el contenido desde archivos locales. La interfa
 - CV descargable, enlaces profesionales y contacto por correo.
 - Metadatos canónicos, Open Graph, datos estructurados, sitemap, robots y RSS.
 - Proveedor local y límite preparado para Directus.
-- Imagen Docker multi-stage: Astro compila y Nginx sirve solamente `dist/`.
-- Configuración de CapRover, endpoint `/healthz`, caché y headers de seguridad.
+- Imagen Docker multi-stage: Astro compila y [Static Web Server](https://static-web-server.net/) sirve solamente `dist/`.
+- Configuración de CapRover (webhook), endpoint `/health`, caché y headers de seguridad.
 - Comprobación automática de tipos, pruebas, build y enlaces internos.
 
 ## Requisitos
@@ -92,7 +92,7 @@ No guardes `.env` en Git. `.env.example` contiene únicamente valores públicos 
 │   └── styles/             # Sistema visual global
 ├── docs/directus-schema.md # Modelo sugerido y procedimiento de migración
 ├── Dockerfile
-├── nginx.conf
+├── sws.toml
 └── captain-definition
 ```
 
@@ -140,7 +140,7 @@ docker run --rm -p 8080:80 yerkoacuna-dev
 Abrir `http://localhost:8080` y comprobar salud:
 
 ```bash
-curl --fail http://localhost:8080/healthz
+curl --fail http://localhost:8080/health
 ```
 
 Para cambiar configuración pública durante el build:
@@ -156,9 +156,9 @@ docker build \
 La imagen tiene dos etapas:
 
 1. Node 22 instala desde el lockfile y ejecuta `astro build`.
-2. Nginx recibe únicamente `dist/` y la configuración del servidor.
+2. [Static Web Server](https://static-web-server.net/) recibe únicamente `dist/` y `sws.toml`.
 
-Nginx sirve los assets fingerprinted de `/_astro/` con caché inmutable de un año, usa una política corta para archivos públicos no versionados, revalida HTML, comprime respuestas textuales y devuelve la página `404.html` con estado HTTP 404. `/healthz` no toca archivos ni servicios externos.
+SWS comprime respuestas textuales, aplica caché (HTML sin cache agresivo, `/_astro/` inmutable), sirve `404.html` con estado 404 y expone `/health` sin tocar archivos ni servicios externos. Astro usa `trailingSlash: "never"`; por eso `redirect-trailing-slash` está desactivado en `sws.toml`.
 
 ## Despliegue en CapRover
 
@@ -168,7 +168,7 @@ En CapRover, crea una app, por ejemplo `yerkoacuna-dev`. Deja el puerto HTTP int
 
 ### 2. Configurar variables
 
-En **App Configs → Environmental Variables**, agrega sólo las variables que quieras sobrescribir. El Dockerfile declara los mismos nombres como argumentos de build para que CapRover los haga disponibles mientras Astro compila.
+En **App Configs → Environmental Variables**, agrega sólo las variables que quieras sobrescribir. El Dockerfile declara los mismos nombres como argumentos de build (y `ENV` en el builder) para que CapRover los haga disponibles mientras Astro compila.
 
 Para la primera versión basta con:
 
@@ -180,32 +180,18 @@ CONTENT_FALLBACK=fail
 
 Si cambias cualquiera de ellas, guarda la configuración y vuelve a desplegar. Reiniciar el contenedor existente no regenera el HTML.
 
-### 3. Desplegar
+### 3. Desplegar (webhook)
 
-Hay dos caminos:
+`captain-definition` apunta a `./Dockerfile`. Conecta el repositorio y la rama `master` desde la pestaña **Deployment** (Dockerfile / webhook). CapRover construye el multi-stage en cada push.
 
-**A. GitHub Actions (recomendado, mismo patrón que `webapp-dipromar`)**
-
-1. En el repo configura estos secrets:
-   - `CAPROVER_SERVER` — URL del CapRover (ej. `https://captain.example.com`)
-   - `APP_NAME` — nombre de la app en CapRover
-   - `APP_TOKEN` — token de deploy de la app
-2. Opcional: variables de repositorio `PUBLIC_*` / `CONTENT_*` para sobrescribir defaults de build.
-3. Un push a `master` (o `workflow_dispatch` / release) ejecuta `.github/workflows/main.yml`:
-   - `npm run verify`
-   - empaqueta `dist/`, `nginx.conf`, `captain-definition` y `Dockerfile.runtime`
-   - despliega con `caprover/deploy-from-github`
-
-**B. Build en CapRover desde el Dockerfile multi-stage**
-
-`captain-definition` apunta a `./Dockerfile` (Node construye y Nginx sirve). Puedes conectar el repo desde la pestaña **Deployment**, o:
+También puedes usar la CLI:
 
 ```bash
 npx caprover login
 npx caprover deploy
 ```
 
-CapRover despliega el commit actual; confirma que todo archivo nuevo requerido esté agregado al repositorio antes de usar la CLI.
+Confirma que `Dockerfile`, `sws.toml` y el resto del código estén en el commit que CapRover va a construir.
 
 ### 4. Dominio y TLS
 
@@ -216,14 +202,14 @@ En **HTTP Settings**:
 3. Activa **Force HTTPS**.
 4. Si `www.yerkoacuna.dev` también apunta a la app, elige una URL canónica y redirige la otra desde la configuración frontal de CapRover.
 
-HSTS pertenece al proxy TLS de CapRover, no al Nginx HTTP interno. Actívalo allí sólo después de confirmar que el dominio y sus subdominios funcionan permanentemente por HTTPS.
+HSTS pertenece al proxy TLS de CapRover, no al SWS HTTP interno. Actívalo allí sólo después de confirmar que el dominio y sus subdominios funcionan permanentemente por HTTPS.
 
 ### 5. Verificar
 
 Comprueba al menos:
 
 ```bash
-curl --fail https://yerkoacuna.dev/healthz
+curl --fail https://yerkoacuna.dev/health
 curl --fail https://yerkoacuna.dev/sitemap-index.xml
 curl --fail https://yerkoacuna.dev/rss.xml
 curl --fail --output /dev/null https://yerkoacuna.dev/cv.pdf
@@ -264,12 +250,12 @@ Es el comportamiento esperado sin `PUBLIC_CONTACT_FORM_ENDPOINT`. El enlace de c
 
 ### El healthcheck falla
 
-Confirma que la app use el puerto interno 80 y que CapRover no haya reemplazado el comando del contenedor. Dentro de la imagen, `/healthz` debe responder `ok` sin depender de Directus.
+Confirma que la app use el puerto interno 80 y que CapRover no haya reemplazado el comando del contenedor. Dentro de la imagen, `/health` debe responder sin depender de Directus.
 
 ## Seguridad y mantenimiento
 
 - No publiques `.env`, tokens de Directus ni información privada del CV.
-- Mantén Node, Astro, Nginx y dependencias actualizados y vuelve a ejecutar `npm run verify`.
-- Revisa la Content Security Policy si agregas analytics, embeds o un nuevo proveedor de formularios; no la desactives globalmente.
+- Mantén Node, Astro, Static Web Server y dependencias actualizados y vuelve a ejecutar `npm run verify`.
+- Revisa la Content Security Policy en `sws.toml` si agregas analytics, embeds o un nuevo proveedor de formularios; no la desactives globalmente.
 - Los headers TLS, redirecciones de dominio y certificados los administra CapRover.
 - Prueba una restauración o rollback antes de automatizar publicaciones desde Directus.
